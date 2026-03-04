@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Future Journey - Info System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fjGold: '#C5A059',
+                        fjNavy: '#0B1120',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#f3f6fc] font-sans text-slate-800 transition-colors duration-200">
+
+    <!-- Header (Future Journey Identity) -->
+    <header class="bg-fjNavy border-b border-fjGold/20 h-16 px-6 flex items-center justify-between sticky top-0 z-30 shadow-lg">
+        <div class="flex items-center gap-4">
+            <!-- Text Logo & Icon -->
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap text-fjGold text-2xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]"></i>
+                <div class="flex flex-col leading-none">
+                    <span class="font-black text-2xl tracking-tight text-fjGold uppercase">
+                        Future Journey
+                    </span>
+                    <span class="text-[9px] text-fjGold/80 tracking-[0.2em] font-medium ml-0.5">YOUR PATH TO YOUR PASSION</span>
+                </div>
+            </div>
+            
+            <div class="h-6 w-px bg-fjGold/20 mx-2"></div>
+            
+            <span id="program-count" class="bg-fjGold/10 text-fjGold border border-fjGold/30 text-xs px-2 py-0.5 rounded font-mono font-semibold">0 Programs</span>
+            <div id="loading-spinner" class="hidden animate-spin text-fjGold">
+                <i data-lucide="loader-2" width="16"></i>
+            </div>
+        </div>
+        
+        <div class="flex-1 max-w-2xl mx-4 md:mx-8 relative group">
+            <i data-lucide="search" width="18" class="absolute search-icon text-slate-500 top-1/2 -translate-y-1/2 group-focus-within:text-fjGold transition-colors"></i>
+            <input 
+                type="text"
+                id="search-input"
+                placeholder="Quick Search..."
+                class="w-full search-input py-2.5 rounded-lg border border-slate-700 bg-[#151D2E] focus:bg-fjNavy focus:ring-2 focus:ring-fjGold/30 focus:border-fjGold/50 transition-all text-sm outline-none text-slate-200 placeholder:text-slate-500"
+            >
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- Language Toggle Button -->
+            <button onclick="toggleLanguage()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-fjGold/30 hover:bg-fjGold hover:text-fjNavy transition-all text-sm font-semibold text-fjGold">
+                <i data-lucide="globe" width="16"></i>
+                <span id="lang-label">العربية</span>
+            </button>
+
+            <button onclick="fetchData()" class="p-2.5 text-fjGold/70 hover:bg-fjGold/10 hover:text-fjGold rounded-lg transition-all" title="Refresh">
+                <i data-lucide="refresh-cw" width="18"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 space-y-6 h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar">
+        
+        <!-- Filters -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4" id="filters-container">
+            <!-- Dynamic Filters -->
+        </div>
+
+        <!-- Action Bar -->
+        <div class="flex justify-between items-center">
+            <div class="flex gap-3">
+                <button class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-fjNavy hover:text-fjGold hover:border-fjNavy transition-all shadow-sm" data-action="download">
+                    <i data-lucide="download" width="16"></i> <span data-i18n="download">Download PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+            <!-- Table Header -->
+            <div class="grid grid-cols-12 bg-fjNavy border-b border-fjGold/20 py-4 px-6 text-xs font-bold text-fjGold uppercase tracking-wider">
+                <div class="col-span-3" data-i18n="colProgram">Program</div>
+                <div class="col-span-3" data-i18n="colUniversity">University</div>
+                <div class="col-span-3" data-i18n="colInfo">Information</div>
+                <div class="col-span-3" data-i18n="colAddress">Address</div>
+            </div>
+            
+            <!-- Table Body -->
+            <div id="programs-list" class="divide-y divide-slate-100">
+                <!-- Data Rows -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Logic Script -->
+    <script src="main.js"></script>
+</body>
+</html>
