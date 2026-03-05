@@ -5,41 +5,10 @@ const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmc2b
 // --- University Logos Mapping ---
 const UNI_LOGOS = {
     // --- PRIVATE UNIVERSITIES IN ISTANBUL ---
-    "ALTINBAS": "https://altinbas.edu.tr/asset/awd/files/4/kurumsal-kimlik/logo/2025-amblem-ingilizce.png",
-    "ATLAS": "",
-    "AYDIN": "",
-    "BAHCESEHIR": "https://bau.edu.tr/images/bau-logo-en.png",
-    "BEYKENT": "",
-    "BEYKOZ": "",
-    "BILGI": "https://upload.wikimedia.org/wikipedia/commons/7/79/Istanbul_Bilgi_University_icon.png",
-    "BIRUNI": "https://www.biruni.edu.tr/assets/img/logo.png",
-    "FATIH": "https://www.fsm.edu.tr/assets/img/logo.png", 
-    "FENERBAHCE": "https://www.fbu.edu.tr/assets/img/logo.png",
-    "GEDIK": "https://www.gedik.edu.tr/assets/img/logo.png",
-    "GELISIM": "https://gelisim.edu.tr/assets/img/logo.png",
-    "HALIC": "https://halic.edu.tr/assets/img/logo.png",
-    "IBN HALDUN": "https://www.ihu.edu.tr/assets/img/logo.png", 
-    "ISIK": "https://www.isikun.edu.tr/assets/images/logo.png",
-    "ISTINYE": "https://istinye.edu.tr/sites/default/files/logo-en.png",
-    "KADIR": "https://www.khas.edu.tr/assets/images/logo.png", 
-    "ISTANBUL KENT": "assets/istanbul_kent.png",
-    "KULTUR": "https://www.iku.edu.tr/assets/img/logo.png",
-    "MEDIPOL": "https://www.medipol.edu.tr/assets/img/medipol-logo-tr.png", 
-    "NISANTASI": "https://www.nisantasi.edu.tr/Images/Nisantasi_Logolar/nisantasi_logo_tr.png",
-    "OKAN": "https://okan.edu.tr/assets/images/logo.png",
-    "OZYEGIN": "https://www.ozyegin.edu.tr/assets/img/logo.png",
-    "SABAHATTIN": "https://www.izu.edu.tr/assets/img/logo.png", 
-    "TOPKAPI": "https://www.topkapi.edu.tr/assets/img/logo.png",
-    "USKUDAR": "https://uskudar.edu.tr/assets/img/logo-tr.png",
-    "YEDITEPE": "https://yeditepe.edu.tr/assets/img/logo.png",
-    "YENI": "https://www.yeniyuzyil.edu.tr/assets/img/logo.png",
-
-    // --- PRIVATE UNIVERSITIES IN ANKARA ---
-    "ANKARA MEDIPOL": "https://ankaramedipol.edu.tr/wp-content/uploads/2019/07/am-logo.png",
-    "ATILIM": "https://www.atilim.edu.tr/assets/img/logo.png",
-    "LOKMAN": "https://www.lokmanhekim.edu.tr/assets/img/logo.png",
-    "OSTIM": "https://www.ostimteknik.edu.tr/assets/img/logo.png",
-    "TED": "https://www.tedu.edu.tr/sites/default/files/logo.png",
+    "ALTINBAS": "assets/altinbas.png",
+    "BAHCESEHIR": "assets/bau.png",
+    "BILGI": "assets/bigli.png",
+    "KENT": "assets/istanbul_kent.png",
 };
 
 // --- Translations ---
