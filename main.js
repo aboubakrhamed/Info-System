@@ -889,10 +889,21 @@ async function downloadPDF() {
     }
 }
 
-// Fallback Proxy logic to prevent CORS crashes for logos
+// Fallback Proxy logic to prevent CORS crashes for logos with Strict Timeout
 function getBase64FromUrl(url) {
     return new Promise((resolve) => {
         if (!url || url.trim() === "") return resolve(null);
+
+        let isResolved = false;
+        const finish = (data) => {
+            if (!isResolved) {
+                isResolved = true;
+                resolve(data);
+            }
+        };
+
+        // Time bomb: If it takes more than 3 seconds, skip the logo so the system doesn't hang!
+        setTimeout(() => finish(null), 3000); 
 
         const img = new Image();
         img.crossOrigin = "Anonymous";
@@ -904,13 +915,14 @@ function getBase64FromUrl(url) {
                 canvas.height = img.height;
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(img, 0, 0);
-                resolve(canvas.toDataURL("image/png"));
+                finish(canvas.toDataURL("image/png"));
             } catch (e) {
-                resolve(null); 
+                finish(null); 
             }
         };
+        
         img.onerror = () => {
-            // Force proxy fetch if original origin fails (CORS bypass for PDF generator)
+            // Try proxy as last resort
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
             const proxyImg = new Image();
             proxyImg.crossOrigin = "Anonymous";
@@ -921,12 +933,12 @@ function getBase64FromUrl(url) {
                     canvas.height = proxyImg.height;
                     const ctx = canvas.getContext("2d");
                     ctx.drawImage(proxyImg, 0, 0);
-                    resolve(canvas.toDataURL("image/png"));
+                    finish(canvas.toDataURL("image/png"));
                 } catch (e) {
-                    resolve(null);
+                    finish(null);
                 }
             };
-            proxyImg.onerror = () => resolve(null);
+            proxyImg.onerror = () => finish(null);
             proxyImg.src = proxyUrl;
         };
 
@@ -950,11 +962,19 @@ function loadScript(url) {
         
         script = document.createElement('script');
         script.src = url;
+        
+        // timeout for script loading
+        const timeout = setTimeout(() => reject(new Error("Script load timeout")), 10000);
+
         script.onload = () => {
+            clearTimeout(timeout);
             script.setAttribute('data-loaded', 'true');
             resolve();
         };
-        script.onerror = reject;
+        script.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error("Failed to load script"));
+        };
         document.head.appendChild(script);
     });
 }
