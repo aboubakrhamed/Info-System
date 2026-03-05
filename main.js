@@ -1,66 +1,45 @@
 // --- Configuration ---
 const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmc2bDu59mtPmAphu6royXethK3nfaEDBiFq_oSMHBKM_84rlIYSOYUl6cv2zIPUh83jSjUtgv4pgd/pub?gid=2139009053&single=true&output=csv";
-const LOGO_URL = "";
+//const LOGO_URL = "";
 
 // --- University Logos Mapping ---
 const UNI_LOGOS = {
-    // */ --- PRIVATE UNIVERSITIES IN ISTANBUL ---
-    "ALTINBAS": "https://www.altinbas.edu.tr/images/logo-tr.png",
-    "AREL": "https://www.arel.edu.tr/assets/img/logo.png",
-    "ATLAS": "https://www.atlas.edu.tr/images/logo.png",
-    "AYDIN": "https://www.aydin.edu.tr/images/logo.png",
+    // --- PRIVATE UNIVERSITIES IN ISTANBUL ---
+    "ALTINBAS": "https://altinbas.edu.tr/asset/awd/files/4/kurumsal-kimlik/logo/2025-amblem-ingilizce.png",
+    "ATLAS": "",
+    "AYDIN": "",
     "BAHCESEHIR": "https://bau.edu.tr/images/bau-logo-en.png",
-    "BAU": "https://bau.edu.tr/images/bau-logo-en.png", 
-    "BEYKENT": "https://www.beykent.edu.tr/assets/images/logo.png",
-    "BEYKOZ": "https://www.beykoz.edu.tr/images/logo.png",
-    "BEZMIALEM": "https://bezmialem.edu.tr/img/logo.png",
+    "BEYKENT": "",
+    "BEYKOZ": "",
     "BILGI": "https://upload.wikimedia.org/wikipedia/commons/7/79/Istanbul_Bilgi_University_icon.png",
-    "BILIM": "https://www.bilim.edu.tr/images/logo.png", 
     "BIRUNI": "https://www.biruni.edu.tr/assets/img/logo.png",
-    "DOGUS": "https://www.dogus.edu.tr/images/default-logo.png",
-    "ESENYURT": "https://www.esenyurt.edu.tr/assets/img/logo.png",
     "FATIH": "https://www.fsm.edu.tr/assets/img/logo.png", 
     "FENERBAHCE": "https://www.fbu.edu.tr/assets/img/logo.png",
-    "GALATA": "https://www.galata.edu.tr/assets/img/logo.png",
     "GEDIK": "https://www.gedik.edu.tr/assets/img/logo.png",
     "GELISIM": "https://gelisim.edu.tr/assets/img/logo.png",
     "HALIC": "https://halic.edu.tr/assets/img/logo.png",
-    "IBN": "https://www.ihu.edu.tr/assets/img/logo.png", 
+    "IBN HALDUN": "https://www.ihu.edu.tr/assets/img/logo.png", 
     "ISIK": "https://www.isikun.edu.tr/assets/images/logo.png",
     "ISTINYE": "https://istinye.edu.tr/sites/default/files/logo-en.png",
     "KADIR": "https://www.khas.edu.tr/assets/images/logo.png", 
-    "KENT": "https://studysehir.com/wp-content/uploads/2024/06/Istanbul-kent-University-logo.png",
+    "ISTANBUL KENT": "assets/istanbul_kent.png",
     "KULTUR": "https://www.iku.edu.tr/assets/img/logo.png",
-    "MALTEPE": "https://www.maltepe.edu.tr/assets/img/logo.png",
     "MEDIPOL": "https://www.medipol.edu.tr/assets/img/medipol-logo-tr.png", 
-    "MEF": "https://www.mef.edu.tr/assets/img/logo.png",
     "NISANTASI": "https://www.nisantasi.edu.tr/Images/Nisantasi_Logolar/nisantasi_logo_tr.png",
     "OKAN": "https://okan.edu.tr/assets/images/logo.png",
     "OZYEGIN": "https://www.ozyegin.edu.tr/assets/img/logo.png",
-    "PIRI": "https://www.pirireis.edu.tr/assets/img/logo.png", 
-    "SABANCI": "https://www.sabanciuniv.edu/assets/img/logo.png",
     "SABAHATTIN": "https://www.izu.edu.tr/assets/img/logo.png", 
-    "TICARET": "https://www.ticaret.edu.tr/uploads/logo/logo.png", 
     "TOPKAPI": "https://www.topkapi.edu.tr/assets/img/logo.png",
     "USKUDAR": "https://uskudar.edu.tr/assets/img/logo-tr.png",
     "YEDITEPE": "https://yeditepe.edu.tr/assets/img/logo.png",
-    "YENI": "https://www.yeniyuzyil.edu.tr/assets/img/logo.png", 
-    "29": "https://www.29mayis.edu.tr/assets/img/logo.png", 
+    "YENI": "https://www.yeniyuzyil.edu.tr/assets/img/logo.png",
 
     // --- PRIVATE UNIVERSITIES IN ANKARA ---
     "ANKARA MEDIPOL": "https://ankaramedipol.edu.tr/wp-content/uploads/2019/07/am-logo.png",
-    "BILIM": "https://ankarabilim.edu.tr/assets/img/logo.png",
     "ATILIM": "https://www.atilim.edu.tr/assets/img/logo.png",
-    "BASKENT": "https://www.baskent.edu.tr/assets/img/logo.png",
-    "BILKENT": "https://w3.bilkent.edu.tr/logo/bilkent-logo.png",
-    "CANKAYA": "https://www.cankaya.edu.tr/assets/img/logo.png",
     "LOKMAN": "https://www.lokmanhekim.edu.tr/assets/img/logo.png",
     "OSTIM": "https://www.ostimteknik.edu.tr/assets/img/logo.png",
     "TED": "https://www.tedu.edu.tr/sites/default/files/logo.png",
-    "TOBB": "https://www.etu.edu.tr/assets/img/logo.png", 
-    "THK": "https://www.thk.edu.tr/assets/img/logo.png", 
-    "UFUK": "https://www.ufuk.edu.tr/assets/img/logo.png",
-    "YUKSEK": "https://yiu.edu.tr/assets/img/logo.png" 
 };
 
 // --- Translations ---
@@ -290,10 +269,10 @@ function handleDropdownKeydown(e, key) {
 function updateHighlight(items) {
     items.forEach((item, index) => {
         if (index === APP_STATE.highlightedIndex) {
-            item.classList.add('bg-indigo-100', 'text-indigo-900');
+            item.classList.add('bg-fjNavy', 'text-fjGold');
             item.scrollIntoView({ block: 'nearest' });
         } else {
-            item.classList.remove('bg-indigo-100', 'text-indigo-900');
+            item.classList.remove('bg-fjNavy', 'text-fjGold');
         }
     });
 }
@@ -313,7 +292,7 @@ function filterDropdownOptions(key, query) {
 
         if (text.includes(lowerQuery) && !isSelected) {
             item.classList.remove('hidden');
-            item.classList.remove('bg-indigo-100', 'text-indigo-900');
+            item.classList.remove('bg-fjNavy', 'text-fjGold');
             hasVisible = true;
         } else {
             item.classList.add('hidden');
@@ -360,10 +339,10 @@ function renderTags(key) {
     
     APP_STATE.filters[key].forEach(val => {
         const tag = document.createElement('div');
-        tag.className = 'flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded-md text-xs font-medium group transition-colors hover:bg-slate-200';
+        tag.className = 'flex items-center gap-1 bg-fjNavy text-fjGold border border-fjGold/30 px-2 py-0.5 rounded-md text-xs font-medium group transition-colors hover:bg-fjGold hover:text-fjNavy';
         tag.innerHTML = `
             <span>${val}</span>
-            <button onclick="event.stopPropagation(); removeTag('${key}', '${val.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-red-500 outline-none">
+            <button onclick="event.stopPropagation(); removeTag('${key}', '${val.replace(/'/g, "\\'")}')" class="text-fjGold/70 hover:text-current outline-none">
                 <i data-lucide="x" width="12"></i>
             </button>
         `;
@@ -613,31 +592,27 @@ function renderPrograms() {
         // --- LOGO LOGIC ---
         const logoUrl = getUniversityLogo(p.university.en);
         const logoHtml = logoUrl 
-            ? `<img src="${logoUrl}" alt="${p.university[lang]}" class="w-10 h-10 object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0">`
-            : `<div class="w-10 h-10 rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
+            ? `<img src="${logoUrl}" alt="${p.university[lang]}" class="w-12 h-12 md:w-10 md:h-10 object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">`
+            : `<div class="w-12 h-12 md:w-10 md:h-10 rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
 
-        let priceHtml = '';
-        
-        // Flight Training Price Logic
+        let priceHtml = `
+            <div class="flex flex-wrap items-center gap-2">
+                ${(p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0") ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}
+                <span class="text-red-600 font-bold text-[15px]">$${p.price}</span>
+            </div>
+        `;
+
         if (p.trainingPrice) {
-            priceHtml += `
+            priceHtml = `
                 <div class="flex flex-col items-start gap-0.5">
                     <div class="flex items-center gap-1">
                         <span class="text-slate-900 font-bold">$${p.price}</span>
-                        <span class="text-xs text-slate-500">(${t.lblDegree.replace(':','')})</span>
+                        <span class="text-[11px] text-slate-500">(${t.lblDegree.replace(':','')})</span>
                     </div>
                     <div class="flex items-center gap-1">
                         <span class="text-amber-600 font-bold">+ €${p.trainingPrice}</span>
-                        <span class="text-xs text-amber-600/80">(Flight)</span>
+                        <span class="text-[11px] text-amber-600/80">(Flight)</span>
                     </div>
-                </div>
-            `;
-        } else {
-            const showOriginal = p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0";
-            priceHtml += `
-                <div class="flex items-center gap-2">
-                    ${showOriginal ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}
-                    <span class="text-red-500 font-bold">$${p.price}</span>
                 </div>
             `;
         }
@@ -645,8 +620,8 @@ function renderPrograms() {
         // --- CASH PRICE LOGIC ---
         if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "") {
             priceHtml += `
-                <div class="flex items-center gap-1 mt-1 text-xs">
-                    <span class="font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-100 flex items-center gap-1">
+                <div class="mt-1">
+                    <span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]">
                         <i data-lucide="banknote" width="12"></i> ${t.lblCash} $${p.cashPrice}
                     </span>
                 </div>
@@ -656,38 +631,48 @@ function renderPrograms() {
         const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`;
 
         const row = document.createElement('div');
-        row.className = 'grid grid-cols-12 py-6 px-6 hover:bg-[#F8FAFC] transition-colors border-b border-slate-100 group';
+        
+        // Mobile-First Custom Layout
+        row.className = 'flex flex-col md:grid md:grid-cols-12 gap-0 md:gap-4 py-5 px-4 md:px-5 hover:bg-slate-50/80 transition-colors border-b border-slate-200 group';
         row.innerHTML = `
-            <div class="col-span-3">
-                <div class="flex items-center">
-                    <h3 class="font-bold text-slate-800 text-[15px] mb-1">${p.name[lang]}</h3>
-                </div>
-                <p class="text-slate-500 text-sm mb-3">${p.language[lang]}</p>
-                <span class="px-3 py-1 rounded text-[10px] font-bold tracking-wide border ${statusColor}">${p.status[lang]}</span>
-            </div>
-            <div class="col-span-3 flex items-start gap-4">
+            <!-- University (Col 2 Desktop, Top Mobile) -->
+            <div class="md:col-span-3 flex items-start md:items-center gap-3 order-1 md:order-2 border-b border-slate-100 md:border-none pb-4 md:pb-0 mb-4 md:mb-0">
                 ${logoHtml}
                 <div class="flex flex-col">
-                    <span class="text-indigo-600 font-bold text-sm uppercase mb-1 cursor-pointer hover:underline">${p.university[lang]}</span>
-                    <a href="#" class="text-blue-400 text-xs hover:underline truncate max-w-[200px]">${t.viewUni}</a>
+                    <span class="text-fjNavy font-extrabold text-[16px] md:text-[15px] uppercase mb-1 leading-tight">${p.university[lang]}</span>
+                    <a href="#" class="text-fjGold text-[12px] hover:underline">${t.viewUni}</a>
                 </div>
             </div>
-            <div class="col-span-3 space-y-1.5">
-                <div class="text-sm"><span class="font-bold text-slate-700">${t.lblFaculty}</span> <span class="text-slate-500">${p.faculty[lang]}</span></div>
-                <div class="text-sm"><span class="font-bold text-slate-700">${t.lblDegree}</span> <span class="text-slate-500">${p.degree[lang]}</span></div>
-                <div class="text-sm flex flex-col items-start gap-1 mt-1">
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-slate-700 self-center">${t.lblPrice}</span> 
+
+            <!-- Split Container -->
+            <div class="grid grid-cols-2 gap-4 md:contents order-2 md:order-none">
+                
+                <!-- Program (Col 1 Desktop, Left Mobile) -->
+                <div class="md:col-span-3 flex flex-col justify-center order-1">
+                    <h3 class="font-bold text-slate-800 text-[16px] md:text-[15px] leading-snug mb-1">${p.name[lang]}</h3>
+                    <p class="text-slate-500 text-[13px] md:text-sm mb-2">${p.language[lang]}</p>
+                    <div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border ${statusColor}">${p.status[lang]}</span>
+                    </div>
+                </div>
+                
+                <!-- Info (Col 3 Desktop, Right Mobile) -->
+                <div class="md:col-span-3 flex flex-col justify-center space-y-2 order-2 md:order-3">
+                    <div class="text-[13px] md:text-sm"><span class="font-bold text-slate-700">${t.lblFaculty}</span> <span class="text-slate-600 block sm:inline">${p.faculty[lang]}</span></div>
+                    <div class="text-[13px] md:text-sm"><span class="font-bold text-slate-700">${t.lblDegree}</span> <span class="text-slate-600">${p.degree[lang]}</span></div>
+                    <div class="text-[13px] md:text-sm flex flex-col items-start gap-1 mt-1">
+                        <span class="font-bold text-slate-700">${t.lblPrice}</span> 
                         ${priceHtml}
                     </div>
                 </div>
+
             </div>
-            <div class="col-span-3 flex justify-between">
-                <div class="space-y-1">
-                    <div class="font-bold text-slate-800 text-sm">${p.country[lang]}, ${p.city[lang]}</div>
-                    <div class="text-slate-600 text-sm">${p.campus[lang]}</div>
-                    <a href="${mapLink}" target="_blank" class="text-slate-400 text-xs mt-1 truncate max-w-[150px] hover:text-indigo-600 hover:underline block" title="View on Google Maps">${p.address}</a>
-                </div>
+            
+            <!-- Address (Col 4 Desktop, Bottom Mobile) -->
+            <div class="md:col-span-3 flex flex-col justify-center order-3 md:order-4 border-t border-slate-100 md:border-none pt-4 md:pt-0 mt-4 md:mt-0">
+                <div class="font-bold text-slate-800 text-sm mb-1">${p.country[lang]}, ${p.city[lang]}</div>
+                <div class="text-slate-600 text-xs mb-1">${p.campus[lang]}</div>
+                <a href="${mapLink}" target="_blank" class="text-slate-500 text-[11px] md:text-xs hover:text-fjNavy hover:underline whitespace-normal break-words leading-relaxed" title="View on Google Maps">${p.address}</a>
             </div>
         `;
         list.appendChild(row);
@@ -727,15 +712,15 @@ function renderPaginationFooter(totalItems, start, end) {
                 <!-- Jump To Page Input -->
                 <div class="flex items-center gap-2">
                     <span class="text-sm text-slate-600 hidden sm:inline">${t.jumpTo}</span>
-                    <input type="number" id="jump-page-input" min="1" max="${totalPages}" class="border border-slate-300 rounded px-2 py-1 text-sm bg-white outline-none focus:border-indigo-500 w-16 text-center" placeholder="#">
-                    <button onclick="jumpToPage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm transition-colors">${t.go}</button>
+                    <input type="number" id="jump-page-input" min="1" max="${totalPages}" class="border border-slate-300 rounded px-2 py-1 text-sm bg-white outline-none focus:border-fjGold w-16 text-center" placeholder="#">
+                    <button onclick="jumpToPage()" class="bg-fjNavy hover:bg-fjGold text-fjGold hover:text-fjNavy px-3 py-1 rounded text-sm transition-colors">${t.go}</button>
                 </div>
 
                 <div class="h-4 w-px bg-slate-300 hidden sm:block"></div>
 
                 <div class="flex items-center gap-2">
                     <span class="text-sm text-slate-600 hidden sm:inline">${t.perPage}</span>
-                    <select id="items-per-page" class="border border-slate-300 rounded px-2 py-1 text-sm bg-white outline-none focus:border-indigo-500">
+                    <select id="items-per-page" class="border border-slate-300 rounded px-2 py-1 text-sm bg-white outline-none focus:border-fjGold">
                         <option value="10" ${APP_STATE.itemsPerPage == 10 ? 'selected' : ''}>10</option>
                         <option value="20" ${APP_STATE.itemsPerPage == 20 ? 'selected' : ''}>20</option>
                         <option value="50" ${APP_STATE.itemsPerPage == 50 ? 'selected' : ''}>50</option>
@@ -787,32 +772,46 @@ function jumpToPage() {
 
 // --- PDF Generation Logic ---
 async function downloadPDF() {
-    // Show spinner
     const spinner = document.getElementById('loading-spinner');
     if(spinner) spinner.classList.remove('hidden');
 
     try {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
+        // 1. Ensure jsPDF is loaded fully
+        if (typeof window.jspdf === 'undefined') {
             await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+        }
+        
+        // 2. Expose jsPDF to window properly so autoTable can hook into it
+        window.jsPDF = window.jspdf.jsPDF;
+        
+        // 3. Ensure autoTable is loaded AFTER window.jsPDF is ready
+        if (typeof window.jsPDF.API.autoTable === 'undefined') {
             await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js");
         }
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new window.jsPDF();
         const filteredData = getFilteredData();
 
-        // 1. Main Future Journey Logo
-        const mainLogoBase64 = await getBase64FromUrl(LOGO_URL);
-        if (mainLogoBase64) {
-            doc.addImage(mainLogoBase64, 'PNG', 14, 10, 40, 10);
-        }
+        // Colors from FJ Identity
+        const navyColor = [11, 17, 32];
+        const goldColor = [197, 160, 89];
 
-        doc.setFontSize(10);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 28);
+        // Header Background
+        doc.setFillColor(...navyColor);
+        doc.rect(0, 0, 210, 40, 'F');
+        
+        // Brand Text (Matching UI style: Bold, Sans-serif -> Helvetica Bold)
+        doc.setTextColor(...goldColor);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(24);
+        doc.text("FUTURE JOURNEY", 14, 25);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("YOUR PATH TO YOUR PASSION", 14, 32);
 
-        // 2. Pre-fetch University Logos
+        // Pre-fetch University Logos safely
         const uniLogoMap = new Map();
-        const uniqueUniNames = [...new Set(filteredData.map(p => p.university.en))];
+        const uniqueUniNames = [...new Set(filteredData.map(p => p?.university?.en).filter(Boolean))];
         
         // Fetch all unique logos in parallel
         await Promise.all(uniqueUniNames.map(async (uniName) => {
@@ -823,8 +822,9 @@ async function downloadPDF() {
             }
         }));
 
+        // Swapped Header Order: University then Program
         const headers = [
-            ['', 'Program', 'University', 'Faculty', 'Degree', 'Language', 'Price', 'Country'] // Added empty col for Logo
+            ['', 'University', 'Program', 'Faculty', 'Degree', 'Language', 'Price', 'Location']
         ];
 
         const body = filteredData.map(p => {
@@ -835,37 +835,45 @@ async function downloadPDF() {
                 priceStr += `\n(Cash: $${p.cashPrice})`;
             }
 
+            // Swapped Body Order: University then Program
             return [
                 '', // Placeholder for Logo
-                p.name.en, 
-                p.university.en,
-                p.faculty.en,
-                p.degree.en,
-                p.language.en,
-                priceStr,
-                p.country.en
+                p?.university?.en || '',
+                p?.name?.en || '', 
+                p?.faculty?.en || '',
+                p?.degree?.en || '',
+                p?.language?.en || '',
+                priceStr || '',
+                p?.country?.en || ''
             ];
         });
 
         doc.autoTable({
             head: headers,
             body: body,
-            startY: 32,
-            styles: { fontSize: 8, valign: 'middle' },
-            headStyles: { fillColor: [46, 51, 70] },
+            startY: 45,
+            styles: { fontSize: 8, valign: 'middle', font: 'helvetica' },
+            headStyles: { fillColor: navyColor, textColor: goldColor, fontStyle: 'bold' },
             columnStyles: {
-                0: { cellWidth: 15 } // Width for logo column
+                0: { cellWidth: 15, halign: 'center' } // Width for logo column and center alignment
             },
             didDrawCell: (data) => {
                 if (data.section === 'body' && data.column.index === 0) {
-                    const uniName = filteredData[data.row.index].university.en;
+                    // Fetch University Name which is now in column 1
+                    const uniName = data.row.raw[1];
+                    if (!uniName) return;
+
                     const logoData = uniLogoMap.get(uniName);
                     if (logoData) {
-                        // Fit image in cell
-                        const dim = data.cell.height - 2;
-                        const x = data.cell.x + 1;
-                        const y = data.cell.y + 1;
-                        doc.addImage(logoData, 'PNG', x, y, dim, dim);
+                        // Calculate dimensions dynamically to ensure it fits beautifully in the cell
+                        const padding = 2;
+                        const dim = data.cell.height - (padding * 2);
+                        // Safety check to prevent dimension crashes
+                        if (dim > 0) {
+                            const x = data.cell.x + (data.cell.width / 2) - (dim / 2); // Center horizontally
+                            const y = data.cell.y + padding; // Apply padding vertically
+                            doc.addImage(logoData, 'PNG', x, y, dim, dim);
+                        }
                     }
                 }
             }
@@ -875,43 +883,77 @@ async function downloadPDF() {
 
     } catch (e) {
         console.error("PDF Generation Error", e);
-        alert("Error generating PDF. Please try again.");
+        alert(`Error generating PDF:\n${e.message || e}\n\nPlease check the console for details.`);
     } finally {
         if(spinner) spinner.classList.add('hidden');
     }
 }
 
+// Fallback Proxy logic to prevent CORS crashes for logos
 function getBase64FromUrl(url) {
     return new Promise((resolve) => {
+        if (!url || url.trim() === "") return resolve(null);
+
         const img = new Image();
         img.crossOrigin = "Anonymous";
-        img.src = url;
+        
         img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            const dataURL = canvas.toDataURL("image/png");
-            resolve(dataURL);
+            try {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                resolve(canvas.toDataURL("image/png"));
+            } catch (e) {
+                resolve(null); 
+            }
         };
-        img.onerror = (err) => {
-            // resolve null instead of reject to continue pdf generation
-            console.error("Failed to load logo", url);
-            resolve(null);
+        img.onerror = () => {
+            // Force proxy fetch if original origin fails (CORS bypass for PDF generator)
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const proxyImg = new Image();
+            proxyImg.crossOrigin = "Anonymous";
+            proxyImg.onload = () => {
+                try {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = proxyImg.width;
+                    canvas.height = proxyImg.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(proxyImg, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                } catch (e) {
+                    resolve(null);
+                }
+            };
+            proxyImg.onerror = () => resolve(null);
+            proxyImg.src = proxyUrl;
         };
+
+        img.src = url;
     });
 }
 
 function loadScript(url) {
     return new Promise((resolve, reject) => {
-        if (document.querySelector(`script[src="${url}"]`)) {
-            resolve();
+        let script = document.querySelector(`script[src="${url}"]`);
+        if (script) {
+            // Check if it already finished loading previously
+            if (script.getAttribute('data-loaded') === 'true') {
+                return resolve();
+            }
+            // Wait for it if it's currently in progress
+            script.addEventListener('load', resolve);
+            script.addEventListener('error', reject);
             return;
         }
-        const script = document.createElement('script');
+        
+        script = document.createElement('script');
         script.src = url;
-        script.onload = resolve;
+        script.onload = () => {
+            script.setAttribute('data-loaded', 'true');
+            resolve();
+        };
         script.onerror = reject;
         document.head.appendChild(script);
     });
@@ -939,14 +981,14 @@ function setupFilters() {
             <div class="flex flex-col space-y-1.5 w-full">
                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">${t.price}</label>
                <div class="flex gap-2">
-                 <input type="number" id="filter-minPrice" placeholder="Min" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500 transition-all">
-                 <input type="number" id="filter-maxPrice" placeholder="Max" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500 transition-all">
+                 <input type="number" id="filter-minPrice" placeholder="Min" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
+                 <input type="number" id="filter-maxPrice" placeholder="Max" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
                </div>
             </div>
         </div>
         <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
              <div class="flex flex-col space-y-1.5 w-48">
-                <select id="sort-select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-indigo-500 cursor-pointer">
+                <select id="sort-select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold cursor-pointer">
                     <option value="">${langT.sortBy}</option>
                     <option value="priceAsc">${langT.sortLowHigh}</option>
                     <option value="priceDesc">${langT.sortHighLow}</option>
@@ -1001,7 +1043,7 @@ function createMultiSelectHtml(label, key) {
         <div class="custom-multiselect relative w-full" id="group-${key}">
             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">${label}</label>
             
-            <div class="w-full min-h-[42px] px-2 py-1.5 bg-white border border-slate-200 rounded-lg flex flex-wrap gap-1 items-center cursor-text focus-within:border-indigo-500 transition-colors" onclick="focusSearch('${key}')">
+            <div class="w-full min-h-[42px] px-2 py-1.5 bg-white border border-slate-200 rounded-lg flex flex-wrap gap-1 items-center cursor-text focus-within:border-fjGold transition-colors" onclick="focusSearch('${key}')">
                 
                 <!-- Selected Tags -->
                 <div id="tags-${key}" class="flex flex-wrap gap-1"></div>
@@ -1031,11 +1073,10 @@ function populateMultiSelect(key) {
     
     container.innerHTML = '';
     uniqueValues.forEach(val => {
-        // Skip if already selected
         if(APP_STATE.filters[key].has(val)) return;
 
         const div = document.createElement('div');
-        div.className = 'dropdown-item px-3 py-2 hover:bg-indigo-50 rounded cursor-pointer text-sm text-slate-700 transition-colors truncate';
+        div.className = 'dropdown-item px-3 py-2 hover:bg-fjGold/10 rounded cursor-pointer text-sm text-slate-700 transition-colors truncate';
         div.dataset.value = val;
         div.textContent = val;
         div.onclick = () => selectItem(key, val);
