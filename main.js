@@ -6,56 +6,39 @@ const UNI_LOGOS = {
     "ALTINBAS": "assets/altinbas.png",
     "BAHCESEHIR": "assets/bau.png",
     "BILGI": "assets/bilgi.png",
-    "KENT": "assets/istanbul_kent.png",
+    "ISTANBUL KENT": "assets/ist_kent.png",
     "AREL": "assets/arel.png",
     "ATLAS": "assets/atlas.png",
-    "AYDIN": "assets/aydin.png",
+    "AYDIN": "assets/istanbul_aydin.png",
     "BAU": "assets/bau.png", 
     "BEYKENT": "assets/beykent.png",
     "BEYKOZ": "assets/beykoz.png",
-    "BEZMIALEM": "assets/bezmialem.png",
-    "BILIM": "assets/bilim.png", 
     "BIRUNI": "assets/biruni.png",
-    "DOGUS": "assets/dogus.png",
-    "ESENYURT": "assets/esenyurt.png",
-    "FATIH": "assets/fatih.png", 
+    "FATIH SULTAN MEHMET": "assets/fatih_sultan_mehmet.png", 
     "FENERBAHCE": "assets/fenerbahce.png",
-    "GALATA": "assets/galata.png",
     "GEDIK": "assets/gedik.png",
     "GELISIM": "assets/gelisim.png",
     "HALIC": "assets/halic.png",
-    "IBN": "assets/ibn.png", 
+    "IBN HALDUN": "assets/ibn_haldun.png", 
     "ISIK": "assets/isik.png",
     "ISTINYE": "assets/istinye.png",
     "KADIR": "assets/kadir.png", 
     "KULTUR": "assets/kultur.png",
-    "MALTEPE": "assets/maltepe.png",
-    "MEDIPOL": "assets/medipol.png", 
-    "MEF": "assets/mef.png",
+    "ISTANBUL MEDIPOL": "assets/ist_medipol.png", 
     "NISANTASI": "assets/nisantasi.png",
     "OKAN": "assets/okan.png",
     "OZYEGIN": "assets/ozyegin.png",
-    "PIRI": "assets/piri.png", 
-    "SABANCI": "assets/sabanci.png",
     "SABAHATTIN": "assets/sabahattin.png", 
     "TICARET": "assets/ticaret.png", 
     "TOPKAPI": "assets/topkapi.png",
     "USKUDAR": "assets/uskudar.png",
     "YEDITEPE": "assets/yeditepe.png",
     "YENI": "assets/yeni.png", 
-    "29": "assets/29.png", 
     "ANKARA MEDIPOL": "assets/ankaramedipol.png",
     "ATILIM": "assets/atilim.png",
-    "BASKENT": "assets/baskent.png",
-    "BILKENT": "assets/bilkent.png",
-    "CANKAYA": "assets/cankaya.png",
     "LOKMAN": "assets/lokman.png",
     "OSTIM": "assets/ostim.png",
     "TED": "assets/ted.png",
-    "TOBB": "assets/tobb.png", 
-    "THK": "assets/thk.png", 
-    "UFUK": "assets/ufuk.png",
-    "YUKSEK": "assets/yuksek.png"
 };
 
 // --- Translations ---
@@ -183,15 +166,21 @@ let APP_STATE = {
     highlightedIndex: -1 
 };
 
-// --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Set Tab Icon (Favicon) ---
-    const favicon = document.createElement('link');
+// --- Force Tab Icon (Favicon) ---
+(function setFavicon() {
+    // إزالة أي أيقونات قديمة المتصفح بيحاول يعتمد عليها
+    document.querySelectorAll("link[rel*='icon']").forEach(el => el.remove());
+    
+    let favicon = document.createElement('link');
     favicon.rel = 'icon';
     favicon.type = 'image/png';
-    favicon.href = 'assets/logo.png';
+    // استخدام ./ لضمان المسار الصحيح على Live Server وإضافة Cache Buster
+    favicon.href = './assets/logo.png?v=' + new Date().getTime();
     document.head.appendChild(favicon);
+})();
 
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     fetchData();
     
@@ -199,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('search-input').addEventListener('input', (e) => {
         APP_STATE.searchTerm = e.target.value.toLowerCase();
         APP_STATE.currentPage = 1;
+        updateAllDropdowns(); // تحديث الفلاتر بناءً على البحث
         renderPrograms();
     });
 
@@ -209,10 +199,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Action Buttons
+    // Action Buttons Logic
     const downloadBtn = document.querySelector('[data-action="download"]');
     if (downloadBtn) {
         downloadBtn.addEventListener('click', downloadPDF);
+        
+        // Dynamically Inject Print Button Next to Download Button
+        const printBtn = document.createElement('button');
+        printBtn.className = 'flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-fjNavy hover:text-fjGold hover:border-fjNavy transition-all shadow-sm';
+        printBtn.innerHTML = `<i data-lucide="printer" width="16"></i> <span data-i18n="print">${TRANSLATIONS[APP_STATE.lang].print}</span>`;
+        printBtn.onclick = executePrint;
+        downloadBtn.parentNode.insertBefore(printBtn, downloadBtn);
+        lucide.createIcons({root: printBtn}); // Render icon for new button
     }
 });
 
@@ -266,6 +264,18 @@ function closeDropdown(key) {
 }
 
 function handleDropdownKeydown(e, key) {
+    const input = document.getElementById(`input-${key}`);
+    
+    // Backspace logic: Remove the last tag if input is empty
+    if (e.key === 'Backspace' && input.value === '') {
+        const filterSet = APP_STATE.filters[key];
+        if (filterSet.size > 0) {
+            const lastItem = Array.from(filterSet).pop();
+            removeTag(key, lastItem);
+        }
+        return;
+    }
+
     const container = document.getElementById(`options-${key}`);
     const items = Array.from(container.querySelectorAll('.dropdown-item:not(.hidden)'));
     
@@ -339,8 +349,8 @@ function selectItem(key, value) {
     APP_STATE.filters[key].add(value);
     renderTags(key);
     const input = document.getElementById(`input-${key}`);
-    input.focus();
-    filterDropdownOptions(key, input.value);
+    if(input) input.focus();
+    updateAllDropdowns(); // تحديث باقي الفلاتر بناءً على الاختيار الجديد
     APP_STATE.currentPage = 1;
     renderPrograms();
 }
@@ -348,16 +358,14 @@ function selectItem(key, value) {
 function removeTag(key, value) {
     APP_STATE.filters[key].delete(value);
     renderTags(key);
-    if (APP_STATE.openDropdown === key) {
-        const input = document.getElementById(`input-${key}`);
-        filterDropdownOptions(key, input.value);
-    }
+    updateAllDropdowns(); // إعادة تقييم الخيارات المتاحة بعد إزالة الفلتر
     APP_STATE.currentPage = 1;
     renderPrograms();
 }
 
 function renderTags(key) {
     const container = document.getElementById(`tags-${key}`);
+    if (!container) return;
     container.innerHTML = '';
     
     APP_STATE.filters[key].forEach(val => {
@@ -374,12 +382,31 @@ function renderTags(key) {
     lucide.createIcons();
 }
 
+// --- تحديث الخيارات الذكية (Cascading Logic) ---
+function updateAllDropdowns() {
+    const filterKeys = ['country', 'city', 'university', 'degree', 'faculty', 'department', 'language', 'type', 'status'];
+    
+    filterKeys.forEach(key => {
+        populateMultiSelect(key);
+        
+        // لو الفلتر ده هو اللي مفتوح حالياً، نرجع نطبق عليه عملية البحث اللي اليوزر كان كاتبها
+        const input = document.getElementById(`input-${key}`);
+        if (APP_STATE.openDropdown === key && input) {
+            filterDropdownOptions(key, input.value);
+        }
+    });
+}
+
 // --- Language & Data Logic ---
 function toggleLanguage() {
     APP_STATE.lang = APP_STATE.lang === 'en' ? 'ar' : 'en';
     applyLanguage();
     setupFilters(); 
     renderPrograms(); 
+    
+    // Update Print button translation if it exists
+    const printSpan = document.querySelector('[data-i18n="print"]');
+    if(printSpan) printSpan.innerText = TRANSLATIONS[APP_STATE.lang].print;
 }
 
 function applyLanguage() {
@@ -547,7 +574,8 @@ function parseCSV(text) {
 }
 
 // --- Data Helper ---
-function getFilteredData() {
+// الدالة دي بقت أذكى وبتاخد باراميتر excludeKey عشان تتجاهل فلتر معين وقت حساب الخيارات المتاحة
+function getFilteredData(excludeKey = null) {
     const lang = APP_STATE.lang;
     let filtered = APP_STATE.data.filter(p => {
         const name = (p.name[lang] || '').toLowerCase();
@@ -561,7 +589,9 @@ function getFilteredData() {
         const matchesPrice = (!isNaN(price) ? (price >= minP && price <= maxP) : true);
 
         const matchesFilters = Object.keys(APP_STATE.filters).every(key => {
-            if (key === 'minPrice' || key === 'maxPrice') return true;
+            // تجاهل البحث في الأسعار هنا (ليها لوجيك لوحدها) وتجاهل الفلتر اللي بنحسب عشانه
+            if (key === 'minPrice' || key === 'maxPrice' || key === excludeKey) return true;
+            
             const set = APP_STATE.filters[key];
             if (set.size === 0) return true;
             
@@ -576,8 +606,11 @@ function getFilteredData() {
         return matchesSearch && matchesPrice && matchesFilters;
     });
 
-    if (APP_STATE.sortBy === 'priceAsc') filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-    else if (APP_STATE.sortBy === 'priceDesc') filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    // مش محتاجين نرتب البيانات وإحنا بنحسب بس الخيارات المتاحة للفلاتر (أسرع)
+    if (!excludeKey) {
+        if (APP_STATE.sortBy === 'priceAsc') filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        else if (APP_STATE.sortBy === 'priceDesc') filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    }
 
     return filtered;
 }
@@ -615,35 +648,27 @@ function renderPrograms() {
         // --- LOGO LOGIC ---
         const logoUrl = getUniversityLogo(p.university.en);
         const logoHtml = logoUrl 
-            ? `<img src="${logoUrl}" alt="${p.university[lang]}" class="w-12 h-12 md:w-10 md:h-10 object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">`
-            : `<div class="w-12 h-12 md:w-10 md:h-10 rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
+            ? `<img src="${logoUrl}" alt="${p.university[lang]}" class="w-[60px] h-[60px] object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">`
+            : `<div class="w-[60px] h-[60px] rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
 
+        // --- NEW PRICE UI LOGIC ---
         let priceHtml = `
-            <div class="flex flex-wrap items-center gap-2">
-                ${(p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0") ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}
-                <span class="text-red-600 font-bold text-[15px]">$${p.price}</span>
+            <div class="flex items-start gap-1">
+                <span class="font-bold text-slate-700 whitespace-nowrap">${t.lblPrice}</span>
+                <div class="flex flex-col items-start gap-0.5">
+                    <div class="flex items-center gap-1">
+                        ${(p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0") ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}
+                        <span class="text-red-600 font-bold text-[15px] leading-none">$${p.price}</span>
+                    </div>
+                    ${p.trainingPrice ? `<div class="flex items-center gap-1 mt-0.5"><span class="text-amber-600 font-bold leading-none">+ €${p.trainingPrice}</span><span class="text-[11px] text-amber-600/80 leading-none">(Flight)</span></div>` : ''}
+                </div>
             </div>
         `;
 
-        if (p.trainingPrice) {
-            priceHtml = `
-                <div class="flex flex-col items-start gap-0.5">
-                    <div class="flex items-center gap-1">
-                        <span class="text-slate-900 font-bold">$${p.price}</span>
-                        <span class="text-[11px] text-slate-500">(${t.lblDegree.replace(':','')})</span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <span class="text-amber-600 font-bold">+ €${p.trainingPrice}</span>
-                        <span class="text-[11px] text-amber-600/80">(Flight)</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- CASH PRICE LOGIC ---
-        if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "") {
+        // لا يظهر الكاش إلا لو كان مختلف عن السعر الأساسي
+        if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "" && p.cashPrice.trim() !== p.price.trim()) {
             priceHtml += `
-                <div class="mt-1">
+                <div class="mt-1.5 mb-0.5">
                     <span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]">
                         <i data-lucide="banknote" width="12"></i> ${t.lblCash} $${p.cashPrice}
                     </span>
@@ -683,8 +708,7 @@ function renderPrograms() {
                 <div class="md:col-span-3 flex flex-col justify-center space-y-2 order-2 md:order-3">
                     <div class="text-[13px] md:text-sm"><span class="font-bold text-slate-700">${t.lblFaculty}</span> <span class="text-slate-600 block sm:inline">${p.faculty[lang]}</span></div>
                     <div class="text-[13px] md:text-sm"><span class="font-bold text-slate-700">${t.lblDegree}</span> <span class="text-slate-600">${p.degree[lang]}</span></div>
-                    <div class="text-[13px] md:text-sm flex flex-col items-start gap-1 mt-1">
-                        <span class="font-bold text-slate-700">${t.lblPrice}</span> 
+                    <div class="text-[13px] md:text-sm flex flex-col items-start mt-1">
                         ${priceHtml}
                     </div>
                 </div>
@@ -793,7 +817,155 @@ function jumpToPage() {
     }
 }
 
-// --- PDF Generation Logic ---
+// --- Dynamic Print Generation ---
+function executePrint() {
+    const filteredData = getFilteredData();
+    if (filteredData.length === 0) return;
+
+    const lang = APP_STATE.lang;
+    const t = TRANSLATIONS[lang];
+    const dir = t.dir;
+    
+    // Grab the current URL path so assets load correctly in the new window
+    const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+
+    // Build exactly the same rows as the UI, but bypassing pagination limits
+    const rowsHtml = filteredData.map(p => {
+        const isClosed = p.status.en.toUpperCase().includes('CLOSED') || p.status.ar.includes('مغلق');
+        const statusColor = isClosed ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200';
+        
+        const logoUrl = getUniversityLogo(p.university.en);
+        const logoHtml = logoUrl 
+            ? `<img src="${logoUrl}" class="w-[60px] h-[60px] object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">`
+            : `<div class="w-[60px] h-[60px] rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
+
+        let priceHtml = `
+            <div class="flex items-start gap-1">
+                <span class="font-bold text-slate-700 whitespace-nowrap">${t.lblPrice}</span>
+                <div class="flex flex-col items-start gap-0.5">
+                    <div class="flex items-center gap-1">
+                        ${(p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0") ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}
+                        <span class="text-red-600 font-bold text-[15px] leading-none">$${p.price}</span>
+                    </div>
+                    ${p.trainingPrice ? `<div class="flex items-center gap-1 mt-0.5"><span class="text-amber-600 font-bold leading-none">+ €${p.trainingPrice}</span><span class="text-[11px] text-amber-600/80 leading-none">(Flight)</span></div>` : ''}
+                </div>
+            </div>
+        `;
+
+        if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "" && p.cashPrice.trim() !== p.price.trim()) {
+            priceHtml += `
+                <div class="mt-1.5 mb-0.5">
+                    <span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]">
+                        <i data-lucide="banknote" width="12"></i> ${t.lblCash} $${p.cashPrice}
+                    </span>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="grid grid-cols-12 gap-4 py-5 px-5 border-b border-slate-200" style="page-break-inside: avoid;">
+                <div class="col-span-3 flex items-center gap-3">
+                    ${logoHtml}
+                    <span class="text-fjNavy font-extrabold text-[15px] uppercase leading-tight">${p.university[lang]}</span>
+                </div>
+                <div class="col-span-4 flex flex-col justify-center">
+                    <h3 class="font-bold text-slate-800 text-[15px] leading-snug mb-1">${p.name[lang]}</h3>
+                    <p class="text-slate-500 text-[13px] mb-2">${p.language[lang]}</p>
+                    <div><span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border ${statusColor}">${p.status[lang]}</span></div>
+                </div>
+                <div class="col-span-3 flex flex-col justify-center space-y-2">
+                    <div class="text-[13px]"><span class="font-bold text-slate-700">${t.lblFaculty}</span> <span class="text-slate-600 block inline">${p.faculty[lang]}</span></div>
+                    <div class="text-[13px]"><span class="font-bold text-slate-700">${t.lblDegree}</span> <span class="text-slate-600">${p.degree[lang]}</span></div>
+                    <div class="text-[13px] flex flex-col items-start mt-1">
+                        ${priceHtml}
+                    </div>
+                </div>
+                <div class="col-span-2 flex flex-col justify-center">
+                    <div class="font-bold text-slate-800 text-sm mb-1">${p.country[lang]}, ${p.city[lang]}</div>
+                    <div class="text-slate-600 text-xs mb-1">${p.campus[lang]}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    const printContent = `
+        <!DOCTYPE html>
+        <html lang="${lang}" dir="${dir}">
+        <head>
+            <meta charset="UTF-8">
+            <base href="${baseUrl}">
+            <title>${t.appTitle} - Print View</title>
+            <!-- Include Tailwind and FontAwesome for exactly the same styling -->
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <script src="https://unpkg.com/lucide@latest"></script>
+            <script>
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            colors: { fjGold: '#C5A059', fjNavy: '#0B1120' },
+                            fontFamily: { sans: ['Inter', 'Cairo', 'sans-serif'] }
+                        }
+                    }
+                }
+            </script>
+            <style>
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: #fff; }
+                @media print {
+                    @page { margin: 15mm; }
+                    .no-print { display: none !important; }
+                }
+            </style>
+        </head>
+        <body class="font-sans text-slate-800 p-8">
+            <!-- Print Header -->
+            <div class="bg-fjNavy p-6 rounded-xl mb-6 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-graduation-cap text-fjGold text-4xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]"></i>
+                    <div class="flex flex-col justify-center mt-0.5">
+                        <h1 class="text-3xl font-black text-fjGold uppercase tracking-tight m-0 leading-none">FUTURE JOURNEY</h1>
+                        <p class="text-[10px] text-fjGold/90 tracking-[0.15em] font-medium mt-1 uppercase w-full">Your path to your passion</p>
+                    </div>
+                </div>
+                <div class="text-sm font-bold text-fjGold bg-fjGold/10 border border-fjGold/30 px-3 py-1 rounded">
+                    ${filteredData.length} ${t.programsCount}
+                </div>
+            </div>
+
+            <!-- Print Table / List -->
+            <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div class="grid grid-cols-12 bg-slate-100 border-b border-slate-200 py-3 px-5 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    <div class="col-span-3">${t.colUniversity}</div>
+                    <div class="col-span-4">${t.colProgram}</div>
+                    <div class="col-span-3">${t.colInfo}</div>
+                    <div class="col-span-2">${t.colAddress}</div>
+                </div>
+                <div class="divide-y divide-slate-100 bg-white">
+                    ${rowsHtml}
+                </div>
+            </div>
+
+            <script>
+                // Give assets and scripts a brief moment to load before executing print
+                setTimeout(() => {
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        window.print();
+                    }, 800);
+                }, 500);
+            </script>
+        </body>
+        </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+}
+
+// --- Legacy PDF Generation Logic (Kept for fallback) ---
 async function downloadPDF() {
     const spinner = document.getElementById('loading-spinner');
     if(spinner) spinner.classList.remove('hidden');
@@ -833,8 +1005,7 @@ async function downloadPDF() {
         const body = filteredData.map(p => {
             let priceStr = p.trainingPrice ? `$${p.price} + €${p.trainingPrice}` : `$${p.price}`;
             
-            // استخدام \n للنزول سطر، و \xA0 (Non-breaking space) لربط كلمة Cash بالسعر ككلمة واحدة عشان متتفصلش
-            if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "") {
+            if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "" && p.cashPrice.trim() !== p.price.trim()) {
                 priceStr += `\nCash:\xA0$${p.cashPrice}`;
             }
 
@@ -1001,7 +1172,7 @@ function setupFilters() {
         </div>
     `;
 
-    ['country', 'city', 'university', 'degree', 'faculty', 'department', 'language', 'type', 'status'].forEach(key => populateMultiSelect(key));
+    updateAllDropdowns(); // استخدام الدالة الذكية بدل إننا نعمل populate عمياني
 
     ['minPrice', 'maxPrice'].forEach(key => {
         const el = document.getElementById(`filter-${key}`);
@@ -1010,6 +1181,7 @@ function setupFilters() {
             el.addEventListener('input', (e) => {
                 APP_STATE.filters[key] = e.target.value;
                 APP_STATE.currentPage = 1;
+                updateAllDropdowns(); // تحديث القوائم مع تغيير السعر
                 renderPrograms();
             });
         }
@@ -1068,9 +1240,14 @@ function createMultiSelectHtml(label, key) {
 function populateMultiSelect(key) {
     const lang = APP_STATE.lang;
     const container = document.getElementById(`options-${key}`);
+    if (!container) return;
+    
     const dataKey = key === 'department' ? 'name' : key;
     
-    const uniqueValues = Array.from(new Set(APP_STATE.data.map(p => p[dataKey][lang]).filter(Boolean))).sort();
+    // سحب البيانات المفلترة بس من غير الفلتر الحالي عشان الخيارات تظهر صح
+    const relevantData = getFilteredData(key); 
+    
+    const uniqueValues = Array.from(new Set(relevantData.map(p => p[dataKey][lang]).filter(Boolean))).sort();
     
     container.innerHTML = '';
     uniqueValues.forEach(val => {
