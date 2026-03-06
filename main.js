@@ -814,16 +814,7 @@ async function downloadPDF() {
         const navyColor = [11, 17, 32];
         const goldColor = [197, 160, 89];
 
-        doc.setFillColor(...navyColor);
-        doc.rect(0, 0, 210, 40, 'F');
-        doc.setTextColor(...goldColor);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(24);
-        doc.text("FUTURE JOURNEY", 14, 25);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.text("YOUR PATH TO YOUR PASSION", 14, 32);
-
+        // Pre-fetch University Logos safely
         const uniLogoMap = new Map();
         const uniqueUniNames = [...new Set(filteredData.map(p => p?.university?.en).filter(Boolean))];
         
@@ -842,7 +833,7 @@ async function downloadPDF() {
         const body = filteredData.map(p => {
             let priceStr = p.trainingPrice ? `$${p.price} + €${p.trainingPrice}` : `$${p.price}`;
             
-            // سطر جديد للسعر الأساسي وسطر منفصل للكاش
+            // إضافة السعر في سطر مستقل عن الكاش بدون تعقيدات
             if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "") {
                 priceStr += `\nCash: $${p.cashPrice}`;
             }
@@ -863,11 +854,24 @@ async function downloadPDF() {
             head: headers,
             body: body,
             startY: 45,
-            rowPageBreak: 'avoid', // منع انقسام الصف على صفحتين نهائياً
+            margin: { top: 45, bottom: 20 }, // ضمان مساحة آمنة لتكرار الهيدر
+            rowPageBreak: 'avoid', // الحل الجذري لمنع قص الصفوف
             styles: { fontSize: 8, valign: 'middle', font: 'helvetica' },
             headStyles: { fillColor: navyColor, textColor: goldColor, fontStyle: 'bold' },
             columnStyles: {
                 0: { cellWidth: 15, halign: 'center' }
+            },
+            didDrawPage: (data) => {
+                // رسم الهيدر تلقائياً في كل صفحة
+                doc.setFillColor(...navyColor);
+                doc.rect(0, 0, 210, 40, 'F');
+                doc.setTextColor(...goldColor);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(24);
+                doc.text("FUTURE JOURNEY", 14, 25);
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9);
+                doc.text("YOUR PATH TO YOUR PASSION", 14, 32);
             },
             didDrawCell: (data) => {
                 if (data.section === 'body' && data.column.index === 0) {
@@ -898,7 +902,7 @@ async function downloadPDF() {
     }
 }
 
-// دالة سحب الصور المبسطة والسريعة جداً للملفات المحلية بدون أي تأخير
+// دالة مبسطة جداً لسحب الصور المحلية بدون بروكسي أو تعطيل للسرعة
 function getBase64FromUrl(url) {
     return new Promise((resolve) => {
         if (!url || url.trim() === "") return resolve(null);
@@ -919,7 +923,7 @@ function getBase64FromUrl(url) {
         };
         
         img.onerror = () => {
-            resolve(null); // فشل سريع ومباشر لو الصورة مش موجودة من غير أي تعليق أو تحميل إضافي
+            resolve(null); // تجاهل أي خطأ فوراً لتسريع الطباعة
         };
 
         img.src = url;
