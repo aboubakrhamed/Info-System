@@ -833,9 +833,9 @@ async function downloadPDF() {
         const body = filteredData.map(p => {
             let priceStr = p.trainingPrice ? `$${p.price} + €${p.trainingPrice}` : `$${p.price}`;
             
-            // إضافة السعر في سطر مستقل عن الكاش بدون تعقيدات
+            // استخدام \n للنزول سطر، و \xA0 (Non-breaking space) لربط كلمة Cash بالسعر ككلمة واحدة عشان متتفصلش
             if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "") {
-                priceStr += `\nCash: $${p.cashPrice}`;
+                priceStr += `\nCash:\xA0$${p.cashPrice}`;
             }
 
             return [
@@ -854,15 +854,15 @@ async function downloadPDF() {
             head: headers,
             body: body,
             startY: 45,
-            margin: { top: 45, bottom: 20 }, // ضمان مساحة آمنة لتكرار الهيدر
-            rowPageBreak: 'avoid', // الحل الجذري لمنع قص الصفوف
+            margin: { top: 45, bottom: 20 },
+            rowPageBreak: 'avoid',
             styles: { fontSize: 8, valign: 'middle', font: 'helvetica' },
             headStyles: { fillColor: navyColor, textColor: goldColor, fontStyle: 'bold' },
             columnStyles: {
-                0: { cellWidth: 15, halign: 'center' }
+                0: { cellWidth: 15, halign: 'center' },
+                6: { cellWidth: 'wrap' } // إضافة الـ wrap عشان تأكد عدم ضغط أو كسر الكلمات جوه عمود السعر
             },
             didDrawPage: (data) => {
-                // رسم الهيدر تلقائياً في كل صفحة
                 doc.setFillColor(...navyColor);
                 doc.rect(0, 0, 210, 40, 'F');
                 doc.setTextColor(...goldColor);
