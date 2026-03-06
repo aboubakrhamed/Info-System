@@ -1,14 +1,61 @@
 // --- Configuration ---
 const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmc2bDu59mtPmAphu6royXethK3nfaEDBiFq_oSMHBKM_84rlIYSOYUl6cv2zIPUh83jSjUtgv4pgd/pub?gid=2139009053&single=true&output=csv";
-//const LOGO_URL = "";
 
-// --- University Logos Mapping ---
+// --- University Logos Mapping (Local Assets) ---
 const UNI_LOGOS = {
-    // --- PRIVATE UNIVERSITIES IN ISTANBUL ---
     "ALTINBAS": "assets/altinbas.png",
     "BAHCESEHIR": "assets/bau.png",
-    "BILGI": "assets/bigli.png",
+    "BILGI": "assets/bilgi.png",
     "KENT": "assets/istanbul_kent.png",
+    "AREL": "assets/arel.png",
+    "ATLAS": "assets/atlas.png",
+    "AYDIN": "assets/aydin.png",
+    "BAU": "assets/bau.png", 
+    "BEYKENT": "assets/beykent.png",
+    "BEYKOZ": "assets/beykoz.png",
+    "BEZMIALEM": "assets/bezmialem.png",
+    "BILIM": "assets/bilim.png", 
+    "BIRUNI": "assets/biruni.png",
+    "DOGUS": "assets/dogus.png",
+    "ESENYURT": "assets/esenyurt.png",
+    "FATIH": "assets/fatih.png", 
+    "FENERBAHCE": "assets/fenerbahce.png",
+    "GALATA": "assets/galata.png",
+    "GEDIK": "assets/gedik.png",
+    "GELISIM": "assets/gelisim.png",
+    "HALIC": "assets/halic.png",
+    "IBN": "assets/ibn.png", 
+    "ISIK": "assets/isik.png",
+    "ISTINYE": "assets/istinye.png",
+    "KADIR": "assets/kadir.png", 
+    "KULTUR": "assets/kultur.png",
+    "MALTEPE": "assets/maltepe.png",
+    "MEDIPOL": "assets/medipol.png", 
+    "MEF": "assets/mef.png",
+    "NISANTASI": "assets/nisantasi.png",
+    "OKAN": "assets/okan.png",
+    "OZYEGIN": "assets/ozyegin.png",
+    "PIRI": "assets/piri.png", 
+    "SABANCI": "assets/sabanci.png",
+    "SABAHATTIN": "assets/sabahattin.png", 
+    "TICARET": "assets/ticaret.png", 
+    "TOPKAPI": "assets/topkapi.png",
+    "USKUDAR": "assets/uskudar.png",
+    "YEDITEPE": "assets/yeditepe.png",
+    "YENI": "assets/yeni.png", 
+    "29": "assets/29.png", 
+    "ANKARA MEDIPOL": "assets/ankaramedipol.png",
+    "ATILIM": "assets/atilim.png",
+    "BASKENT": "assets/baskent.png",
+    "BILKENT": "assets/bilkent.png",
+    "CANKAYA": "assets/cankaya.png",
+    "LOKMAN": "assets/lokman.png",
+    "OSTIM": "assets/ostim.png",
+    "TED": "assets/ted.png",
+    "TOBB": "assets/tobb.png", 
+    "THK": "assets/thk.png", 
+    "UFUK": "assets/ufuk.png",
+    "YUKSEK": "assets/yuksek.png"
 };
 
 // --- Translations ---
@@ -138,6 +185,13 @@ let APP_STATE = {
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Set Tab Icon (Favicon) ---
+    const favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.type = 'image/png';
+    favicon.href = 'assets/logo.png';
+    document.head.appendChild(favicon);
+
     lucide.createIcons();
     fetchData();
     
@@ -745,31 +799,23 @@ async function downloadPDF() {
     if(spinner) spinner.classList.remove('hidden');
 
     try {
-        // 1. Ensure jsPDF is loaded fully
         if (typeof window.jspdf === 'undefined') {
             await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
         }
-        
-        // 2. Expose jsPDF to window properly so autoTable can hook into it
         window.jsPDF = window.jspdf.jsPDF;
         
-        // 3. Ensure autoTable is loaded AFTER window.jsPDF is ready
         if (typeof window.jsPDF.API.autoTable === 'undefined') {
-            await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js");
+            await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
         }
 
         const doc = new window.jsPDF();
         const filteredData = getFilteredData();
 
-        // Colors from FJ Identity
         const navyColor = [11, 17, 32];
         const goldColor = [197, 160, 89];
 
-        // Header Background
         doc.setFillColor(...navyColor);
         doc.rect(0, 0, 210, 40, 'F');
-        
-        // Brand Text (Matching UI style: Bold, Sans-serif -> Helvetica Bold)
         doc.setTextColor(...goldColor);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(24);
@@ -778,11 +824,9 @@ async function downloadPDF() {
         doc.setFontSize(9);
         doc.text("YOUR PATH TO YOUR PASSION", 14, 32);
 
-        // Pre-fetch University Logos safely
         const uniLogoMap = new Map();
         const uniqueUniNames = [...new Set(filteredData.map(p => p?.university?.en).filter(Boolean))];
         
-        // Fetch all unique logos in parallel
         await Promise.all(uniqueUniNames.map(async (uniName) => {
             const url = getUniversityLogo(uniName);
             if (url) {
@@ -791,7 +835,6 @@ async function downloadPDF() {
             }
         }));
 
-        // Swapped Header Order: University then Program
         const headers = [
             ['', 'University', 'Program', 'Faculty', 'Degree', 'Language', 'Price', 'Location']
         ];
@@ -799,14 +842,13 @@ async function downloadPDF() {
         const body = filteredData.map(p => {
             let priceStr = p.trainingPrice ? `$${p.price} + €${p.trainingPrice}` : `$${p.price}`;
             
-            // Add Cash Price to PDF if available
+            // سطر جديد للسعر الأساسي وسطر منفصل للكاش
             if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "") {
-                priceStr += `\n(Cash: $${p.cashPrice})`;
+                priceStr += `\nCash: $${p.cashPrice}`;
             }
 
-            // Swapped Body Order: University then Program
             return [
-                '', // Placeholder for Logo
+                '', 
                 p?.university?.en || '',
                 p?.name?.en || '', 
                 p?.faculty?.en || '',
@@ -821,26 +863,24 @@ async function downloadPDF() {
             head: headers,
             body: body,
             startY: 45,
+            rowPageBreak: 'avoid', // منع انقسام الصف على صفحتين نهائياً
             styles: { fontSize: 8, valign: 'middle', font: 'helvetica' },
             headStyles: { fillColor: navyColor, textColor: goldColor, fontStyle: 'bold' },
             columnStyles: {
-                0: { cellWidth: 15, halign: 'center' } // Width for logo column and center alignment
+                0: { cellWidth: 15, halign: 'center' }
             },
             didDrawCell: (data) => {
                 if (data.section === 'body' && data.column.index === 0) {
-                    // Fetch University Name which is now in column 1
                     const uniName = data.row.raw[1];
                     if (!uniName) return;
 
                     const logoData = uniLogoMap.get(uniName);
                     if (logoData) {
-                        // Calculate dimensions dynamically to ensure it fits beautifully in the cell
                         const padding = 2;
                         const dim = data.cell.height - (padding * 2);
-                        // Safety check to prevent dimension crashes
                         if (dim > 0) {
-                            const x = data.cell.x + (data.cell.width / 2) - (dim / 2); // Center horizontally
-                            const y = data.cell.y + padding; // Apply padding vertically
+                            const x = data.cell.x + (data.cell.width / 2) - (dim / 2);
+                            const y = data.cell.y + padding;
                             doc.addImage(logoData, 'PNG', x, y, dim, dim);
                         }
                     }
@@ -858,24 +898,12 @@ async function downloadPDF() {
     }
 }
 
-// Fallback Proxy logic to prevent CORS crashes for logos with Strict Timeout
+// دالة سحب الصور المبسطة والسريعة جداً للملفات المحلية بدون أي تأخير
 function getBase64FromUrl(url) {
     return new Promise((resolve) => {
         if (!url || url.trim() === "") return resolve(null);
 
-        let isResolved = false;
-        const finish = (data) => {
-            if (!isResolved) {
-                isResolved = true;
-                resolve(data);
-            }
-        };
-
-        // Time bomb: If it takes more than 3 seconds, skip the logo so the system doesn't hang!
-        setTimeout(() => finish(null), 3000); 
-
         const img = new Image();
-        img.crossOrigin = "Anonymous";
         
         img.onload = () => {
             try {
@@ -884,31 +912,14 @@ function getBase64FromUrl(url) {
                 canvas.height = img.height;
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(img, 0, 0);
-                finish(canvas.toDataURL("image/png"));
+                resolve(canvas.toDataURL("image/png"));
             } catch (e) {
-                finish(null); 
+                resolve(null); 
             }
         };
         
         img.onerror = () => {
-            // Try proxy as last resort
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-            const proxyImg = new Image();
-            proxyImg.crossOrigin = "Anonymous";
-            proxyImg.onload = () => {
-                try {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = proxyImg.width;
-                    canvas.height = proxyImg.height;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(proxyImg, 0, 0);
-                    finish(canvas.toDataURL("image/png"));
-                } catch (e) {
-                    finish(null);
-                }
-            };
-            proxyImg.onerror = () => finish(null);
-            proxyImg.src = proxyUrl;
+            resolve(null); // فشل سريع ومباشر لو الصورة مش موجودة من غير أي تعليق أو تحميل إضافي
         };
 
         img.src = url;
@@ -919,11 +930,9 @@ function loadScript(url) {
     return new Promise((resolve, reject) => {
         let script = document.querySelector(`script[src="${url}"]`);
         if (script) {
-            // Check if it already finished loading previously
             if (script.getAttribute('data-loaded') === 'true') {
                 return resolve();
             }
-            // Wait for it if it's currently in progress
             script.addEventListener('load', resolve);
             script.addEventListener('error', reject);
             return;
@@ -932,7 +941,6 @@ function loadScript(url) {
         script = document.createElement('script');
         script.src = url;
         
-        // timeout for script loading
         const timeout = setTimeout(() => reject(new Error("Script load timeout")), 10000);
 
         script.onload = () => {
