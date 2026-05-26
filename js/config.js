@@ -1,5 +1,5 @@
 // 1. ملف config.js (الإعدادات والثوابت)
-const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmc2bDu59mtPmAphu6royXethK3nfaEDBiFq_oSMHBKM_84rlIYSOYUl6cv2zIPUh83jSjUtgv4pgd/pub?gid=2139009053&single=true&output=csv";
+const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQucuUM6H6vqRU5C4lL7yZ4MXsOA2x95rEFeG-DhcGwSljfPh9JObEhQQORg_nI0pWuKC7QDCxK_Vqh/pub?gid=0&single=true&output=csv";
 
 const UNI_LOGOS = {
     "ALTINBAS": "assets/altinbas.png",
