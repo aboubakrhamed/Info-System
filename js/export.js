@@ -1,5 +1,3 @@
-// 4. ملف export.js (الطباعة وتصدير الـ PDF)
-
 // دالة الطباعة (Print)
 function executePrint() {
     const filteredData = getFilteredData(); if (filteredData.length === 0) return;
@@ -17,7 +15,6 @@ function executePrint() {
             priceHtml += `<div class="mt-1.5 mb-0.5"><span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]"><i data-lucide="banknote" width="12"></i> ${t.lblCash} $${p.cashPrice}</span></div>`;
         }
 
-        // التعديل هنا: المدينة الأول وبعدين الدولة
         return `<div class="grid grid-cols-12 gap-4 py-5 px-5 border-b border-slate-200" style="page-break-inside: avoid;"><div class="col-span-3 flex items-center gap-3">${logoHtml}<span class="text-fjNavy font-extrabold text-[15px] uppercase leading-tight">${p.university[lang]}</span></div><div class="col-span-4 flex flex-col justify-center"><h3 class="font-bold text-slate-800 text-[15px] leading-snug mb-1">${p.name[lang]}</h3><p class="text-slate-500 text-[13px] mb-2">${p.language[lang]}</p><div><span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border ${statusColor}">${p.status[lang]}</span></div></div><div class="col-span-3 flex flex-col justify-center space-y-2"><div class="text-[13px]"><span class="font-bold text-slate-700">${t.lblFaculty}</span> <span class="text-slate-600 block inline">${p.faculty[lang]}</span></div><div class="text-[13px]"><span class="font-bold text-slate-700">${t.lblDegree}</span> <span class="text-slate-600">${p.degree[lang]}</span></div><div class="text-[13px] flex flex-col items-start mt-1">${priceHtml}</div></div><div class="col-span-2 flex flex-col justify-center"><div class="font-bold text-slate-800 text-sm mb-1">${p.city[lang]}, ${p.country[lang]}</div><div class="text-slate-600 text-xs mb-1">${p.campus[lang]}</div></div></div>`;
     }).join('');
 
@@ -47,7 +44,6 @@ async function downloadPDF() {
         const navyColor = [11, 17, 32];
         const goldColor = [197, 160, 89];
 
-        // 1. سحب لوجوهات الجامعات
         const uniLogoMap = new Map();
         const uniqueUniNames = [...new Set(filteredData.map(p => p?.university?.en).filter(Boolean))];
         await Promise.all(uniqueUniNames.map(async (uniName) => {
@@ -58,7 +54,6 @@ async function downloadPDF() {
             }
         }));
 
-        // 2. سحب أيقونة التخرج الخارجية وتلوينها بالذهبي
         const capUrl = "svg/graduation-cap.svg";
         const capBase64 = await getBase64FromUrl(capUrl, "#C5A059");
 
@@ -79,7 +74,6 @@ async function downloadPDF() {
                 p?.degree?.[lang] || '',
                 p?.language?.[lang] || '',
                 priceStr || '',
-                // التعديل هنا: المدينة الأول وبعدين الدولة
                 `${p?.city?.[lang] || ''}, ${p?.country?.[lang] || ''}`
             ];
         });
@@ -88,7 +82,7 @@ async function downloadPDF() {
             head: headers,
             body: body,
             startY: 45,
-            margin: { top: 15, bottom: 20 }, // التوب قليل عشان باقي الصفحات تبدأ من فوق
+            margin: { top: 15, bottom: 20 },
             rowPageBreak: 'avoid',
             styles: { fontSize: 8, valign: 'middle', font: 'helvetica' },
             headStyles: { fillColor: navyColor, textColor: goldColor, fontStyle: 'bold', halign: 'left' },
@@ -97,17 +91,15 @@ async function downloadPDF() {
                 6: { cellWidth: 'wrap' } 
             },
             didDrawPage: (data) => {
-                // البار الكحلي يظهر في الصفحة الأولى بس
                 if (data.pageNumber === 1) {
                     doc.setFillColor(...navyColor);
                     doc.rect(0, 0, 297, 40, 'F'); 
                     
                     let textStartX = 14;
                     
-                    // رسم قبعة التخرج
                     if (capBase64) {
                         doc.addImage(capBase64, 'PNG', textStartX, 13, 14, 14);
-                        textStartX += 18; // إزاحة النص عشان ما يركبش على الأيقونة
+                        textStartX += 18; 
                     }
 
                     doc.setTextColor(...goldColor);
@@ -149,12 +141,11 @@ async function downloadPDF() {
     }
 }
 
-// دالة سحب الصور + تلوين أيقونة الـ SVG
 function getBase64FromUrl(url, colorize = null) {
     return new Promise((resolve) => {
         if (!url || url.trim() === "") return resolve(null);
         const img = new Image();
-        img.crossOrigin = "Anonymous"; // عشان يسحب من اللينكات الخارجية بدون مشاكل CORS
+        img.crossOrigin = "Anonymous";
         img.onload = () => {
             try {
                 const canvas = document.createElement("canvas");
@@ -163,7 +154,6 @@ function getBase64FromUrl(url, colorize = null) {
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 
-                // لو بعتنا لون (زي الدهبي للقبعة)، بيلون الصورة كلها بيه
                 if (colorize) {
                     ctx.globalCompositeOperation = "source-in";
                     ctx.fillStyle = colorize;

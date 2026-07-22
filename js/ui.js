@@ -3,8 +3,16 @@
 function toggleLanguage() {
     APP_STATE.lang = APP_STATE.lang === 'en' ? 'ar' : 'en';
     applyLanguage(); 
-    setupFilters(); 
-    renderPrograms(); 
+    
+    // تحديث المحتوى بناءً على الصفحة المفتوحة
+    if (document.getElementById('filters-container')) {
+        setupFilters(); 
+        renderPrograms(); 
+    }
+    if (document.getElementById('scholarships-container')) {
+        renderScholarships();
+    }
+    
     const printSpan = document.querySelector('[data-i18n="print"]');
     if(printSpan) printSpan.innerText = TRANSLATIONS[APP_STATE.lang].print;
 }
@@ -14,65 +22,55 @@ function applyLanguage() {
     document.documentElement.setAttribute('dir', t.dir);
     document.documentElement.setAttribute('lang', APP_STATE.lang);
     document.body.style.fontFamily = `"${t.font}", sans-serif`;
-    document.getElementById('lang-label').innerText = t.langBtn;
+    
+    const langLabel = document.getElementById('lang-label');
+    if(langLabel) langLabel.innerText = t.langBtn;
+    
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key];
     });
-    document.getElementById('search-input').placeholder = t.searchPlaceholder;
+    
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.placeholder = t.searchPlaceholder;
 }
 
+// === Dropdown and Filtering Logic (for Programs) ===
 function focusSearch(key) {
     const input = document.getElementById(`input-${key}`);
-    if (input) { 
-        input.focus(); 
-        openDropdown(key); 
-    }
+    if (input) { input.focus(); openDropdown(key); }
 }
 
 function openDropdown(key) {
     const dropdown = document.getElementById(`dropdown-${key}`);
     const input = document.getElementById(`input-${key}`);
     
-    // إغلاق أي قائمة أخرى مفتوحة قبل فتح الجديدة
     if (APP_STATE.openDropdown && APP_STATE.openDropdown !== key) {
         closeDropdown(APP_STATE.openDropdown);
     }
-
     if (dropdown && dropdown.classList.contains('hidden')) {
         dropdown.classList.remove('hidden'); 
-        APP_STATE.openDropdown = key; 
-        APP_STATE.highlightedIndex = -1; 
-        filterDropdownOptions(key, input.value);
+        APP_STATE.openDropdown = key; APP_STATE.highlightedIndex = -1; filterDropdownOptions(key, input.value);
     }
 }
 
 function closeDropdown(key) {
     const dropdown = document.getElementById(`dropdown-${key}`);
-    const input = document.getElementById(`input-${key}`);
     if (dropdown) dropdown.classList.add('hidden');
-    // لا يتم تصفير الـ input هنا إلا عند الإغلاق الفعلي المتعمد
-    APP_STATE.openDropdown = null; 
-    APP_STATE.highlightedIndex = -1;
+    APP_STATE.openDropdown = null; APP_STATE.highlightedIndex = -1;
 }
 
-// إغلاق بـ Escape فقط
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && APP_STATE.openDropdown) {
         const input = document.getElementById(`input-${APP_STATE.openDropdown}`);
-        if(input) input.value = ''; // تصفير عند الهروب فقط
-        closeDropdown(APP_STATE.openDropdown);
+        if(input) input.value = ''; closeDropdown(APP_STATE.openDropdown);
     }
 });
 
 function handleDropdownKeydown(e, key) {
     const input = document.getElementById(`input-${key}`);
-    
     if (e.key === 'Backspace' && input.value === '') {
         const filterSet = APP_STATE.filters[key];
-        if (filterSet.size > 0) { 
-            const lastItem = Array.from(filterSet).pop(); 
-            removeTag(key, lastItem); 
-        }
+        if (filterSet.size > 0) { const lastItem = Array.from(filterSet).pop(); removeTag(key, lastItem); }
         return;
     }
 
@@ -80,34 +78,15 @@ function handleDropdownKeydown(e, key) {
     const items = Array.from(container.querySelectorAll('.dropdown-item:not(.hidden)'));
     if (items.length === 0) return;
 
-    if (e.key === 'ArrowDown') { 
-        e.preventDefault(); 
-        APP_STATE.highlightedIndex++; 
-        if (APP_STATE.highlightedIndex >= items.length) APP_STATE.highlightedIndex = 0; 
-        updateHighlight(items); 
-    }
-    else if (e.key === 'ArrowUp') { 
-        e.preventDefault(); 
-        APP_STATE.highlightedIndex--; 
-        if (APP_STATE.highlightedIndex < 0) APP_STATE.highlightedIndex = items.length - 1; 
-        updateHighlight(items); 
-    }
-    else if (e.key === 'Enter') { 
-        e.preventDefault(); 
-        if (APP_STATE.highlightedIndex > -1 && items[APP_STATE.highlightedIndex]) {
-            items[APP_STATE.highlightedIndex].click(); 
-        }
-    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); APP_STATE.highlightedIndex++; if (APP_STATE.highlightedIndex >= items.length) APP_STATE.highlightedIndex = 0; updateHighlight(items); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); APP_STATE.highlightedIndex--; if (APP_STATE.highlightedIndex < 0) APP_STATE.highlightedIndex = items.length - 1; updateHighlight(items); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (APP_STATE.highlightedIndex > -1 && items[APP_STATE.highlightedIndex]) { items[APP_STATE.highlightedIndex].click(); } }
 }
 
 function updateHighlight(items) {
     items.forEach((item, index) => {
-        if (index === APP_STATE.highlightedIndex) { 
-            item.classList.add('bg-fjNavy', 'text-fjGold'); 
-            item.scrollIntoView({ block: 'nearest' }); 
-        } else { 
-            item.classList.remove('bg-fjNavy', 'text-fjGold'); 
-        }
+        if (index === APP_STATE.highlightedIndex) { item.classList.add('bg-fjNavy', 'text-fjGold'); item.scrollIntoView({ block: 'nearest' }); } 
+        else { item.classList.remove('bg-fjNavy', 'text-fjGold'); }
     });
 }
 
@@ -116,74 +95,44 @@ function filterDropdownOptions(key, query, resetHighlight = true) {
     if (!container) return;
 
     const items = container.querySelectorAll('.dropdown-item');
-    const lowerQuery = (query || '').toLowerCase(); 
-    let hasVisible = false; 
-    
+    const lowerQuery = (query || '').toLowerCase(); let hasVisible = false; 
     if (resetHighlight) APP_STATE.highlightedIndex = -1;
 
     items.forEach(item => {
-        const value = item.dataset.value; 
-        const text = item.textContent.toLowerCase(); 
-        const isSelected = APP_STATE.filters[key].has(value);
-        if (text.includes(lowerQuery) && !isSelected) { 
-            item.classList.remove('hidden', 'bg-fjNavy', 'text-fjGold'); 
-            hasVisible = true; 
-        } else { 
-            item.classList.add('hidden'); 
-        }
+        const value = item.dataset.value; const text = item.textContent.toLowerCase(); const isSelected = APP_STATE.filters[key].has(value);
+        if (text.includes(lowerQuery) && !isSelected) { item.classList.remove('hidden', 'bg-fjNavy', 'text-fjGold'); hasVisible = true; } 
+        else { item.classList.add('hidden'); }
     });
 
     let noOptMsg = container.querySelector('.no-options-msg');
     if (!hasVisible) {
         if(!noOptMsg) {
-            noOptMsg = document.createElement('div'); 
-            noOptMsg.className = 'no-options-msg p-2 text-sm text-slate-400 text-center';
-            noOptMsg.innerText = TRANSLATIONS[APP_STATE.lang].noOptions; 
-            container.appendChild(noOptMsg);
+            noOptMsg = document.createElement('div'); noOptMsg.className = 'no-options-msg p-2 text-sm text-slate-400 text-center';
+            noOptMsg.innerText = TRANSLATIONS[APP_STATE.lang].noOptions; container.appendChild(noOptMsg);
         }
-    } else if (noOptMsg) { 
-        noOptMsg.remove(); 
-    }
+    } else if (noOptMsg) { noOptMsg.remove(); }
 
-    // إعادة رسم الـ Highlight لو كنا في وضع الاختيار المستمر
     const visibleItems = Array.from(container.querySelectorAll('.dropdown-item:not(.hidden)'));
     if (!resetHighlight && visibleItems.length > 0) {
-        if (APP_STATE.highlightedIndex >= visibleItems.length) {
-            APP_STATE.highlightedIndex = visibleItems.length - 1;
-        }
+        if (APP_STATE.highlightedIndex >= visibleItems.length) { APP_STATE.highlightedIndex = visibleItems.length - 1; }
         updateHighlight(visibleItems);
     }
 }
 
 function selectItem(key, value) {
-    // 1. التقاط الحالة الحالية قبل أي تغيير
     const input = document.getElementById(`input-${key}`);
     const currentQuery = input ? input.value : '';
     const oldIndex = APP_STATE.highlightedIndex;
 
-    // 2. تحديث الداتا
     APP_STATE.filters[key].add(value); 
-    renderTags(key);
-    updateAllDropdowns(); 
-    APP_STATE.currentPage = 1; 
-    renderPrograms();
+    renderTags(key); updateAllDropdowns(); APP_STATE.currentPage = 1; renderPrograms();
 
-    // 3. تثبيت الواجهة (Hack لمنع الإغلاق أو التصفير)
     setTimeout(() => {
         const inputRef = document.getElementById(`input-${key}`);
         const dropdown = document.getElementById(`dropdown-${key}`);
-        
         if (inputRef && dropdown) {
-            // نرجع النص اللي كان مكتوب بالظبط
-            inputRef.value = currentQuery;
-            inputRef.focus();
-            
-            // نجبر القائمة تفضل مفتوحة
-            dropdown.classList.remove('hidden');
-            APP_STATE.openDropdown = key;
-            
-            // نفلتر الداتا فوراً بناءً على النص المسترجع مع تثبيت مكان السهم
-            APP_STATE.highlightedIndex = oldIndex;
+            inputRef.value = currentQuery; inputRef.focus();
+            dropdown.classList.remove('hidden'); APP_STATE.openDropdown = key; APP_STATE.highlightedIndex = oldIndex;
             filterDropdownOptions(key, currentQuery, false);
         }
     }, 10); 
@@ -191,13 +140,8 @@ function selectItem(key, value) {
 
 function removeTag(key, value) {
     APP_STATE.filters[key].delete(value); 
-    renderTags(key); 
-    updateAllDropdowns(); 
-    APP_STATE.currentPage = 1; 
-    renderPrograms();
-    
-    const input = document.getElementById(`input-${key}`);
-    if(input) input.focus();
+    renderTags(key); updateAllDropdowns(); APP_STATE.currentPage = 1; renderPrograms();
+    const input = document.getElementById(`input-${key}`); if(input) input.focus();
 }
 
 function renderTags(key) {
@@ -212,12 +156,12 @@ function renderTags(key) {
     lucide.createIcons();
 }
 
+// === Building the Filter UI ===
 function updateAllDropdowns() {
     const filterKeys = ['country', 'city', 'university', 'degree', 'faculty', 'department', 'language', 'type', 'status'];
     filterKeys.forEach(key => {
         populateMultiSelect(key);
         const input = document.getElementById(`input-${key}`);
-        // تحديث الخيارات للفلتر المفتوح بدون تصفير السهم وبدون مسح النص
         if (APP_STATE.openDropdown === key && input) {
             filterDropdownOptions(key, input.value, false);
         }
@@ -226,6 +170,8 @@ function updateAllDropdowns() {
 
 function setupFilters() {
     const container = document.getElementById('filters-container'); 
+    if (!container) return; // الحماية لصفحة المنح
+    
     const t = TRANSLATIONS[APP_STATE.lang].filters; 
     const langT = TRANSLATIONS[APP_STATE.lang];
     container.innerHTML = `
@@ -295,8 +241,12 @@ function populateMultiSelect(key) {
     renderTags(key);
 }
 
+// === Rendering Main Programs View ===
 function renderPrograms() {
-    const list = document.getElementById('programs-list'); const countLabel = document.getElementById('program-count');
+    const list = document.getElementById('programs-list'); 
+    if (!list) return; // الحماية لصفحة المنح
+    
+    const countLabel = document.getElementById('program-count');
     const lang = APP_STATE.lang; const t = TRANSLATIONS[lang]; list.innerHTML = '';
     const filtered = getFilteredData(); countLabel.innerText = `${filtered.length} ${t.programsCount}`;
     const totalItems = filtered.length; const totalPages = Math.ceil(totalItems / APP_STATE.itemsPerPage);
@@ -321,7 +271,6 @@ function renderPrograms() {
         const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`;
         const row = document.createElement('div');
         row.className = 'flex flex-col md:grid md:grid-cols-12 gap-0 md:gap-4 py-5 px-4 md:px-5 hover:bg-slate-50/80 transition-colors border-b border-slate-200 group';
-        // التعديل هنا: المدينة الأول وبعدين الدولة
         row.innerHTML = `<div class="md:col-span-3 flex items-start md:items-center gap-3 order-1 md:order-2 border-b border-slate-100 md:border-none pb-4 md:pb-0 mb-4 md:mb-0">${logoHtml}<div class="flex flex-col"><span class="text-fjNavy font-extrabold text-[16px] md:text-[15px] uppercase mb-1 leading-tight">${p.university[lang]}</span><a href="#" class="text-fjGold text-[12px] hover:underline">${t.viewUni}</a></div></div><div class="grid grid-cols-2 gap-4 md:contents order-2 md:order-none"><div class="md:col-span-3 flex flex-col justify-center order-1"><h3 class="font-bold text-slate-800 text-[16px] md:text-[15px] leading-snug mb-1">${p.name[lang]}</h3><p class="text-slate-500 text-[13px] md:text-sm mb-2">${p.language[lang]}</p><div><span class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border ${statusColor}">${p.status[lang]}</span></div></div><div class="md:col-span-3 flex flex-col justify-center space-y-2 order-2 md:order-3"><div class="text-[13px] md:text-sm"><span class="font-bold text-slate-700">${t.lblFaculty}</span> <span class="text-slate-600 block sm:inline">${p.faculty[lang]}</span></div><div class="text-[13px] md:text-sm"><span class="font-bold text-slate-700">${t.lblDegree}</span> <span class="text-slate-600">${p.degree[lang]}</span></div><div class="text-[13px] md:text-sm flex flex-col items-start mt-1">${priceHtml}</div></div></div><div class="md:col-span-3 flex flex-col justify-center order-3 md:order-4 border-t border-slate-100 md:border-none pt-4 md:pt-0 mt-4 md:mt-0"><div class="font-bold text-slate-800 text-sm mb-1">${p.city[lang]}, ${p.country[lang]}</div><div class="text-slate-600 text-xs mb-1">${p.campus[lang]}</div><a href="${mapLink}" target="_blank" class="text-slate-500 text-[11px] md:text-xs hover:text-fjNavy hover:underline whitespace-normal break-words leading-relaxed" title="View on Google Maps">${p.address}</a></div>`;
         list.appendChild(row);
     });
@@ -346,4 +295,148 @@ function changePage(delta) { APP_STATE.currentPage += delta; renderPrograms(); }
 function jumpToPage() {
     const input = document.getElementById('jump-page-input'); const pageNum = parseInt(input.value); const filtered = getFilteredData(); const totalPages = Math.ceil(filtered.length / APP_STATE.itemsPerPage);
     if (pageNum >= 1 && pageNum <= totalPages) { APP_STATE.currentPage = pageNum; renderPrograms(); } else { alert(APP_STATE.lang === 'en' ? `Please enter a valid page number (1-${totalPages})` : `الرجاء إدخال رقم صفحة صحيح (1-${totalPages})`); }
+}
+
+// === Rendering Scholarships View ===
+function renderScholarships() {
+    const container = document.getElementById('scholarships-container');
+    if (!container) return; // الحماية لصفحة البرامج
+    
+    const lang = APP_STATE.lang;
+    const t = TRANSLATIONS[lang];
+    
+    container.innerHTML = '';
+    
+    if (!SCHOLARSHIPS_DATA || SCHOLARSHIPS_DATA.length === 0) {
+        container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-400">No scholarships available at the moment.</div>`;
+        return;
+    }
+
+    SCHOLARSHIPS_DATA.forEach((uniData, index) => {
+        const uniName = uniData.university[lang];
+        const logoUrl = getUniversityLogo(uniData.university.en);
+        const condition = uniData.condition[lang];
+        const accordionId = `accordion-${index}`;
+        
+        // حساب إجمالي المقاعد ديناميكياً باستخدام reduce
+        const calculatedTotalSeats = uniData.programs.reduce((total, prog) => total + (parseInt(prog.seats) || 0), 0);
+        
+        const logoHtml = logoUrl 
+            ? `<img src="${logoUrl}" alt="${uniName}" class="h-16 w-16 object-contain p-1 rounded-lg border border-slate-200 bg-white shadow-sm mb-3">` 
+            : `<div class="h-16 w-16 rounded-lg border border-slate-200 bg-white p-2 flex items-center justify-center shadow-sm mb-3"><i data-lucide="building-2" class="text-slate-400 w-8 h-8"></i></div>`;
+
+        // Generate Programs List for this University
+        let programsHtml = `<div class="flex flex-col gap-3 mt-4 border-t border-slate-100 pt-4">`;
+        
+        uniData.programs.forEach(prog => {
+            const safeUniEn = encodeURIComponent(uniData.university.en);
+            const safeUniAr = encodeURIComponent(uniData.university.ar);
+            const safeProgEn = encodeURIComponent(prog.name.en);
+            const safeProgAr = encodeURIComponent(prog.name.ar);
+            const safeDeg = encodeURIComponent(prog.degree[lang]);
+            const safeLang = encodeURIComponent(prog.language[lang]);
+            
+            programsHtml += `
+                <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:bg-slate-100 transition-colors">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div class="flex gap-3 items-center">
+                            ${logoUrl ? `<img src="${logoUrl}" class="h-10 w-10 object-contain rounded-full border border-slate-200 bg-white hidden sm:block">` : ''}
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm mb-1">${prog.name[lang]}</h4>
+                                <div class="flex flex-wrap gap-2 text-xs text-slate-600">
+                                    <span class="bg-white px-2 py-0.5 border border-slate-200 rounded">${t.lblDegree} ${prog.degree[lang]}</span>
+                                    <span class="bg-white px-2 py-0.5 border border-slate-200 rounded">${t.lblLang} ${prog.language[lang]}</span>
+                                    <span class="bg-fjNavy text-fjGold px-2 py-0.5 rounded font-bold">${t.lblSeats} ${prog.seats}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
+                            <span class="text-red-600 font-bold text-lg leading-none">$${prog.price}</span>
+                            <button onclick="reserveScholarship('${safeUniEn}', '${safeUniAr}', '${safeProgEn}', '${safeProgAr}', '${safeDeg}', '${safeLang}', '${prog.price}')" class="bg-fjGold hover:bg-yellow-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1">
+                                <i class="fa-brands fa-whatsapp text-sm"></i> ${t.reserve}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        programsHtml += `</div>`;
+
+        // University Card
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col";
+        
+        card.innerHTML = `
+            <div class="p-5 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleAccordion('${accordionId}')">
+                <div class="flex items-start justify-between">
+                    <div>
+                        ${logoHtml}
+                        <h3 class="font-extrabold text-fjNavy text-lg mb-1 leading-tight">${uniName}</h3>
+                        <div class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-md text-xs font-bold mb-3">
+                            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                            ${t.totalScholarships}: ${calculatedTotalSeats}
+                        </div>
+                    </div>
+                    <div class="text-slate-400 bg-slate-100 rounded-full p-1 transition-transform duration-300 transform" id="icon-${accordionId}">
+                        <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                    </div>
+                </div>
+                
+                ${condition ? `
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-3 text-sm text-amber-800 rounded-r-lg mt-2">
+                    <span class="font-bold">${t.condition}:</span> ${condition}
+                </div>
+                ` : ''}
+            </div>
+            
+            <div id="${accordionId}" class="hidden px-5 pb-5 transition-all duration-300">
+                ${programsHtml}
+            </div>
+        `;
+        
+        container.appendChild(card);
+    });
+    
+    lucide.createIcons();
+}
+
+function toggleAccordion(id) {
+    const content = document.getElementById(id);
+    const icon = document.getElementById(`icon-${id}`);
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+    } else {
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+    }
+}
+
+// Function attached to global window to handle WhatsApp Reservation
+window.reserveScholarship = function(uniEn, uniAr, progEn, progAr, degree, lang, price) {
+    uniEn = decodeURIComponent(uniEn);
+    uniAr = decodeURIComponent(uniAr);
+    progEn = decodeURIComponent(progEn);
+    progAr = decodeURIComponent(progAr);
+    degree = decodeURIComponent(degree);
+    lang = decodeURIComponent(lang);
+    
+    const medicalRegex = /طب بشري|طب أسنان|صيدلة|medicine|dentistry|pharmacy/i;
+    const isMedical = medicalRegex.test(progAr) || medicalRegex.test(progEn);
+    
+    const programNameAr = isMedical ? progAr : "................................";
+    const programNameEn = isMedical ? progEn : "................................";
+    
+    const uniName = APP_STATE.lang === 'ar' ? uniAr : uniEn;
+    const progName = APP_STATE.lang === 'ar' ? programNameAr : programNameEn;
+    
+    let msg = APP_STATE.lang === 'ar' 
+        ? `مرحباً، أود حجز منحة دراسية:\nالجامعة: ${uniName}\nالتخصص: ${progName}\nالدرجة: ${degree}\nاللغة: ${lang}\nالسعر: $${price}`
+        : `Hello, I would like to reserve a scholarship:\nUniversity: ${uniName}\nProgram: ${progName}\nDegree: ${degree}\nLanguage: ${lang}\nPrice: $${price}`;
+
+    const phone = "905526406104"; 
+    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
 }

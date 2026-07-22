@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Future Journey - Scholarships</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fjGold: '#C5A059',
+                        fjNavy: '#0B1120',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 transition-colors duration-200">
+
+    <!-- Header -->
+    <header class="bg-fjNavy border-b border-fjGold/20 h-16 md:h-20 px-3 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-lg">
+        <div class="flex items-center gap-2 md:gap-4 shrink-0">
+            <!-- Logo Section -->
+            <div class="flex items-center gap-1.5 md:gap-3 shrink-0">
+                <i class="fa-solid fa-graduation-cap text-fjGold text-[1.25rem] sm:text-3xl md:text-4xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]"></i>
+                <div class="flex flex-col items-center justify-center mt-0.5 md:mt-0">
+                    <span class="font-black text-[12px] sm:text-[16px] md:text-xl lg:text-2xl tracking-tight text-fjGold uppercase leading-none">
+                        Future Journey
+                    </span>
+                    <span class="text-[5px] sm:text-[7px] md:text-[9px] text-fjGold/90 tracking-[0.1em] sm:tracking-[0.15em] font-medium mt-0.5 md:mt-1 whitespace-nowrap uppercase text-center w-full">
+                        Your path to your passion
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-2 md:gap-3 shrink-0">
+            <!-- Navigate back to Programs -->
+            <a href="index.html" class="hidden md:flex items-center justify-center px-3 py-1.5 rounded-lg border border-slate-600 hover:bg-slate-800 hover:text-white transition-all text-sm font-bold text-slate-300 gap-2">
+                <i class="fa-solid fa-list"></i>
+                <span data-i18n="navPrograms">Academic Programs</span>
+            </a>
+
+            <!-- Language Toggle -->
+            <button onclick="toggleLanguage()" class="flex items-center justify-center w-8 h-8 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded-lg border border-fjGold/30 hover:bg-fjGold hover:text-fjNavy transition-all text-sm font-semibold text-fjGold">
+                <i data-lucide="globe" width="16"></i>
+                <span id="lang-label" class="hidden md:inline ml-2 rtl:mr-2 rtl:ml-0">العربية</span>
+            </button>
+
+            <!-- WhatsApp -->
+            <a href="https://wa.me/905526406104" target="_blank" class="flex items-center justify-center w-8 h-8 md:w-auto md:h-auto md:p-2.5 text-fjGold/70 hover:bg-[#25D366]/10 hover:text-[#25D366] rounded-lg transition-all" title="Contact Us">
+                <i class="fa-brands fa-whatsapp text-[20px]"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Link (Visible only on small screens) -->
+    <div class="md:hidden bg-white border-b border-slate-200 p-2 flex justify-center">
+        <a href="index.html" class="flex w-full items-center justify-center px-3 py-2 rounded-lg bg-slate-100 border border-slate-300 text-slate-700 font-bold text-sm gap-2">
+            <i class="fa-solid fa-list"></i>
+            <span data-i18n="navPrograms">Academic Programs</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-3 md:p-6 space-y-4 md:space-y-6 min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)]">
+        
+        <div id="scholarships-view" class="space-y-6 pb-10 max-w-7xl mx-auto">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
+                <h2 class="text-xl md:text-3xl font-black text-fjNavy flex items-center gap-3">
+                    <i class="fa-solid fa-award text-fjGold text-2xl md:text-4xl drop-shadow-sm"></i> 
+                    <span data-i18n="tabScholarships">Available Scholarships</span>
+                </h2>
+            </div>
+            
+            <!-- Scholarships Container (Added items-start to prevent height stretching) -->
+            <div id="scholarships-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                <!-- Data populated by JS -->
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- Logic Script -->
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

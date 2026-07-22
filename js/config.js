@@ -3,18 +3,19 @@ const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQucuU
 
 const UNI_LOGOS = {
     "ALTINBAS": "assets/altinbas.png",
-    "BAHCESEHIR": "assets/bau.png",
-    "BILGI": "assets/bilgi.png",
+    "BAHCESEHIR UNIVERSITY": "assets/bau.png",
+    "BAHCESEHIR CYPRUS UNIVERSITY": "assets/bau_cybrus.png",
     "ISTANBUL KENT": "assets/ist_kent.png",
     "AREL": "assets/arel.png",
     "ATLAS": "assets/atlas.png",
-    "AYDIN": "assets/istanbul_aydin.png",
-    "BAU": "assets/bau.png", 
+    "ISTANBUL AYDIN": "assets/istanbul_aydin.png", 
+    "CYPRUS AYDIN UNIVERSITY": "assets/cyprus_aydin.png", 
     "BEYKENT": "assets/beykent.png",
     "BEYKOZ": "assets/beykoz.png",
     "BIRUNI": "assets/biruni.png",
     "FATIH SULTAN MEHMET": "assets/fatih_sultan_mehmet.png", 
     "FENERBAHCE": "assets/fenerbahce.png",
+    "FINAL": "assets/final.png",
     "GEDIK": "assets/gedik.png",
     "GELISIM": "assets/gelisim.png",
     "HALIC": "assets/halic.png",
@@ -32,7 +33,7 @@ const UNI_LOGOS = {
     "TOPKAPI": "assets/topkapi.png",
     "USKUDAR": "assets/uskudar.png",
     "YEDITEPE": "assets/yeditepe.png",
-    "YENI": "assets/yeni.png", 
+    "YENI YUZYIL": "assets/yeni_yuzyil.png", 
     "ANKARA MEDIPOL": "assets/ankaramedipol.png",
     "ATILIM": "assets/atilim.png",
     "LOKMAN": "assets/lokman.png",
@@ -48,7 +49,18 @@ const TRANSLATIONS = {
         lblYears: 'Years:', viewUni: 'View University', select: 'Select', selected: 'Selected', searchOptions: 'Search options...',
         clearFilters: 'Clear Filters', noOptions: 'No options found', sortBy: 'Sort By', sortLowHigh: 'Price: Low to High',
         sortHighLow: 'Price: High to Low', showing: 'Showing', to: 'to', of: 'of', perPage: 'Per Page', prev: 'Previous', next: 'Next',
-        jumpTo: 'Go to page', go: 'Go', filters: { country: 'Country', city: 'City', university: 'University', degree: 'Degree', faculty: 'Faculty', department: 'Department', language: 'Language', type: 'Course Type', status: 'Status', price: 'Price Range' }, langBtn: 'العربية'
+        jumpTo: 'Go to page', go: 'Go', langBtn: 'العربية',
+        filters: { country: 'Country', city: 'City', university: 'University', degree: 'Degree', faculty: 'Faculty', department: 'Department', language: 'Language', type: 'Course Type', status: 'Status', price: 'Price Range' },
+        
+        // Navigation and Scholarships
+        navPrograms: 'Academic Programs',
+        navScholarships: 'Scholarships',
+        tabScholarships: 'Available Scholarships',
+        totalScholarships: 'Available Seats',
+        condition: 'Condition',
+        reserve: 'Reserve',
+        lblLang: 'Language:',
+        lblSeats: 'Seats:'
     },
     ar: {
         dir: 'rtl', font: 'Cairo', appTitle: 'Future Journey', searchPlaceholder: 'بحث سريع (الجامعة، التخصص، المدينة...)',
@@ -57,7 +69,18 @@ const TRANSLATIONS = {
         lblYears: 'سنوات:', viewUni: 'عرض الجامعة', select: 'اختر', selected: 'محدد', searchOptions: 'ابحث في القائمة...',
         clearFilters: 'إلغاء الفلاتر', noOptions: 'لا توجد خيارات', sortBy: 'ترتيب حسب', sortLowHigh: 'السعر: من الأقل للأعلى',
         sortHighLow: 'السعر: من الأعلى للأقل', showing: 'عرض', to: 'إلى', of: 'من أصل', perPage: 'في الصفحة', prev: 'السابق', next: 'التالي',
-        jumpTo: 'اذهب لصفحة', go: 'اذهب', filters: { country: 'الدولة', city: 'المدينة', university: 'الجامعة', degree: 'الدرجة', faculty: 'الكلية', department: 'التخصص', language: 'اللغة', type: 'نوع الكورس', status: 'الحالة', price: 'نطاق السعر' }, langBtn: 'English'
+        jumpTo: 'اذهب لصفحة', go: 'اذهب', langBtn: 'English',
+        filters: { country: 'الدولة', city: 'المدينة', university: 'الجامعة', degree: 'الدرجة', faculty: 'الكلية', department: 'التخصص', language: 'اللغة', type: 'نوع الكورس', status: 'الحالة', price: 'نطاق السعر' },
+        
+        // Navigation and Scholarships
+        navPrograms: 'البرامج الأكاديمية',
+        navScholarships: 'المنح',
+        tabScholarships: 'المنح الدراسية المتاحة',
+        totalScholarships: 'إجمالي المنح',
+        condition: 'شرط المنحة',
+        reserve: 'حجز',
+        lblLang: 'اللغة:',
+        lblSeats: 'المقاعد:'
     }
 };
 

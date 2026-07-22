@@ -1,7 +1,7 @@
 // 2. ملف data.js (الـ State ومعالجة البيانات)
 
 let APP_STATE = {
-    lang: 'en',
+    lang: 'en', // تم تعديل اللغة الافتراضية إلى الإنجليزية
     data: [],
     filters: {
         country: new Set(), city: new Set(), university: new Set(), degree: new Set(),
@@ -10,6 +10,103 @@ let APP_STATE = {
     },
     sortBy: '', searchTerm: '', currentPage: 1, itemsPerPage: 10, openDropdown: null, highlightedIndex: -1 
 };
+
+// بيانات المنح مع إضافة خاصية (currency) لتحديد العملة لكل منحة
+const SCHOLARSHIPS_DATA = [
+    {
+        id: "uni_1",
+        university: { en: "ISTANBUL AYDIN UNIVERSITY", ar: "جامعة إسطنبول أيدن" },
+        condition: { en: "Must maintain 2.5 GPA in order to not lose the scholarship", ar: "يجب أن يحصل الطالب على 2.5 GPA حتى لا يفقد المنحة" },
+        programs: [
+           /* {
+                name: { en: "Medicine", ar: "طب بشري" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "English", ar: "الإنجليزية" },
+                price: "20000",
+                currency: "$",
+                seats: 2
+            },
+            {
+                name: { en: "Dentistry", ar: "طب أسنان" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "Turkish", ar: "التركية" },
+                price: "15000",
+                currency: "$",
+                seats: 3
+            },
+            {
+                name: { en: "Pharmacy", ar: "الصيدلة" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "English", ar: "الإنجليزية" },
+                price: "3500",
+                currency: "$",
+                seats: 10
+            },*/
+            {
+                name: { en: "Software Engineering", ar: "هندسة برمجيات" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "English", ar: "الإنجليزية" },
+                price: "9500",
+                currency: "$",
+                seats: 2
+            },
+            {
+                name: { en: "All other majors", ar: "كل التخصصات الأخرى" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "English", ar: "الإنجليزية" },
+                price: "9000",
+                currency: "$",
+                seats: 3
+            },
+        ]
+    },
+    {
+        id: "uni_2",
+        university: { en: "Cyprus Aydin University", ar: "جامعة قبرص أيدن" },
+        condition: { en: "No specific conditions", ar: "لا يوجد شروط محددة" },
+        programs: [
+            {
+                name: { en: "Dentistry", ar: "طب أسنان" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "Turkish", ar: "التركية" },
+                price: "8500",
+                currency: "€",
+                seats: 2
+            },
+            {
+                name: { en: "All other majors", ar: "كل التخصصات الأخرى" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "Turkish", ar: "التركية" },
+                price: "2000",
+                currency: "€",
+                seats: 2
+            },
+        ]
+    },
+    {
+        id: "uni_3",
+        university: { en: "Final International University", ar: "جامعة فاينال الدولية" },
+        condition: { en: "No specific conditions", ar: "لا يوجد شروط محددة" },
+        programs: [
+            {
+                name: { en: "Dentistry", ar: "طب أسنان" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "", ar: "" },
+                price: "8500",
+                currency: "€",
+                seats: 2
+            },
+            {
+                name: { en: "Pharmacy", ar: "صيدلة" },
+                degree: { en: "Bachelor", ar: "بكالوريوس" },
+                language: { en: "", ar: "" },
+                price: "3000",
+                currency: "€",
+                seats: 2
+            },
+        ]
+    },
+];
 
 async function fetchData() {
     const spinner = document.getElementById('loading-spinner');
@@ -44,8 +141,13 @@ async function fetchData() {
 function processData(text) {
     APP_STATE.data = parseCSV(text);
     applyLanguage(); 
-    setupFilters();
-    renderPrograms();
+    
+    if (document.getElementById('filters-container')) {
+        setupFilters();
+    }
+    if (document.getElementById('programs-list')) {
+        renderPrograms();
+    }
 }
 
 function parseCSV(text) {
@@ -88,22 +190,15 @@ function parseCSV(text) {
         const cols = splitLine(line); 
         if (cols.length < 5) return null;
 
-        // دالة تنظيف المسافات
         const getRawVal = (i) => (i > -1 && cols[i]) ? cols[i].replace(/\r/g, '').replace(/\s+/g, ' ').trim() : '';
         
-        // دالة توحيد حالة الأحرف للإنجليزي مع الحفاظ على ما بين القوسين كابيتال
         const getCleanVal = (i, keepParensUpper = false) => {
             const str = getRawVal(i);
             if (!str) return '';
-            
-            // تطبيق الـ Title Case الأساسي
             let cleanStr = str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-            
-            // لو مفعل خاصية الأقواس، بنحول أي نص داخل (...) لـ Upper Case بالكامل
             if (keepParensUpper) {
                 cleanStr = cleanStr.replace(/\(([^)]+)\)/g, (match) => match.toUpperCase());
             }
-            
             return cleanStr;
         };
 
@@ -122,7 +217,6 @@ function parseCSV(text) {
         return {
             id: index, 
             name: { en: getCleanVal(idx.nameEn, true) || "Unnamed", ar: getRawVal(idx.nameAr) || getCleanVal(idx.nameEn, true) },
-            // تم تفعيل الحفاظ على الأقواس هنا أيضاً للجامعات
             university: { en: getCleanVal(idx.uniEn, true), ar: getRawVal(idx.uniAr) || getCleanVal(idx.uniEn, true) }, 
             faculty: { en: getCleanVal(idx.facEn), ar: getRawVal(idx.facAr) || getCleanVal(idx.facEn) },
             degree: { en: getCleanVal(idx.degEn), ar: getRawVal(idx.degAr) || getCleanVal(idx.degEn) }, 
