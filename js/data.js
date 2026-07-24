@@ -1,8 +1,9 @@
 // 2. ملف data.js (الـ State ومعالجة البيانات)
 
 let APP_STATE = {
-    lang: 'en', // تم تعديل اللغة الافتراضية إلى الإنجليزية
-    data: [],
+    lang: 'en', // اللغة الافتراضية إنجليزي
+    data: [], // بيانات البرامج الأكاديمية
+    scholarshipsData: [], // بيانات المنح سيتم تخزينها هنا بعد جلبها من جوجل شيت
     filters: {
         country: new Set(), city: new Set(), university: new Set(), degree: new Set(),
         faculty: new Set(), department: new Set(), language: new Set(), type: new Set(),
@@ -11,133 +12,56 @@ let APP_STATE = {
     sortBy: '', searchTerm: '', currentPage: 1, itemsPerPage: 10, openDropdown: null, highlightedIndex: -1 
 };
 
-// بيانات المنح مع إضافة خاصية (currency) لتحديد العملة لكل منحة
-const SCHOLARSHIPS_DATA = [
-    {
-        id: "uni_1",
-        university: { en: "ISTANBUL AYDIN UNIVERSITY", ar: "جامعة إسطنبول أيدن" },
-        condition: { en: "Must maintain 2.5 GPA in order to not lose the scholarship", ar: "يجب أن يحصل الطالب على 2.5 GPA حتى لا يفقد المنحة" },
-        programs: [
-           /* {
-                name: { en: "Medicine", ar: "طب بشري" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "English", ar: "الإنجليزية" },
-                price: "20000",
-                currency: "$",
-                seats: 2
-            },
-            {
-                name: { en: "Dentistry", ar: "طب أسنان" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "Turkish", ar: "التركية" },
-                price: "15000",
-                currency: "$",
-                seats: 3
-            },
-            {
-                name: { en: "Pharmacy", ar: "الصيدلة" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "English", ar: "الإنجليزية" },
-                price: "3500",
-                currency: "$",
-                seats: 10
-            },*/
-            {
-                name: { en: "Software Engineering", ar: "هندسة برمجيات" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "English", ar: "الإنجليزية" },
-                price: "9500",
-                currency: "$",
-                seats: 2
-            },
-            {
-                name: { en: "All other majors", ar: "كل التخصصات الأخرى" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "English", ar: "الإنجليزية" },
-                price: "9000",
-                currency: "$",
-                seats: 3
-            },
-        ]
-    },
-    {
-        id: "uni_2",
-        university: { en: "Cyprus Aydin University", ar: "جامعة قبرص أيدن" },
-        condition: { en: "No specific conditions", ar: "لا يوجد شروط محددة" },
-        programs: [
-            {
-                name: { en: "Dentistry", ar: "طب أسنان" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "Turkish", ar: "التركية" },
-                price: "8500",
-                currency: "€",
-                seats: 2
-            },
-            {
-                name: { en: "All other majors", ar: "كل التخصصات الأخرى" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "Turkish", ar: "التركية" },
-                price: "2000",
-                currency: "€",
-                seats: 2
-            },
-        ]
-    },
-    {
-        id: "uni_3",
-        university: { en: "Final International University", ar: "جامعة فاينال الدولية" },
-        condition: { en: "No specific conditions", ar: "لا يوجد شروط محددة" },
-        programs: [
-            {
-                name: { en: "Dentistry", ar: "طب أسنان" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "", ar: "" },
-                price: "8500",
-                currency: "€",
-                seats: 2
-            },
-            {
-                name: { en: "Pharmacy", ar: "صيدلة" },
-                degree: { en: "Bachelor", ar: "بكالوريوس" },
-                language: { en: "", ar: "" },
-                price: "3000",
-                currency: "€",
-                seats: 2
-            },
-        ]
-    },
-];
-
+// دالة لجلب البيانات بناءً على الصفحة المفتوحة
 async function fetchData() {
     const spinner = document.getElementById('loading-spinner');
     if (spinner) spinner.classList.remove('hidden');
     
-    const isValidData = (text) => text && text.length > 50 && (text.includes(',') || text.includes('University'));
+    const isProgramsPage = !!document.getElementById('programs-list');
+    const urlToFetch = isProgramsPage ? GOOGLE_SHEET_URL : SCHOLARSHIPS_SHEET_URL;
 
     try {
-        const response = await fetch(GOOGLE_SHEET_URL);
+        const response = await fetch(urlToFetch);
         if (response.ok) {
             const text = await response.text();
-            if (isValidData(text)) { processData(text); return; }
+            if (isProgramsPage) {
+                processData(text); 
+            } else {
+                processScholarshipsData(text);
+            }
+            return;
         }
         throw new Error("Direct fetch failed");
     } catch (error) {
         console.warn("Direct fetch blocked, trying Proxies...");
         try {
-            const proxyUrl1 = `https://api.allorigins.win/raw?url=${encodeURIComponent(GOOGLE_SHEET_URL)}`;
+            const proxyUrl1 = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlToFetch)}`;
             const response1 = await fetch(proxyUrl1);
             if (response1.ok) {
                 const text = await response1.text();
-                if (isValidData(text)) { processData(text); return; }
+                if (isProgramsPage) {
+                    processData(text); 
+                } else {
+                    processScholarshipsData(text);
+                }
+                return;
             }
         } catch (err) {
-            console.error("All data fetch attempts failed.");
+            console.error("All data fetch attempts failed.", err);
+            // إظهار رسالة خطأ في حالة فشل جلب المنح
+            if (!isProgramsPage) {
+                const container = document.getElementById('scholarships-container');
+                if(container) container.innerHTML = `<div class="col-span-full p-10 text-center text-red-500">Failed to load scholarships data. Please check the Google Sheet link or try again later.</div>`;
+            }
         }
     } finally {
         if (spinner) spinner.classList.add('hidden');
     }
 }
 
+// ==========================================
+// معالجة بيانات البرامج الأكاديمية (القديمة)
+// ==========================================
 function processData(text) {
     APP_STATE.data = parseCSV(text);
     applyLanguage(); 
@@ -263,4 +187,102 @@ function getFilteredData(excludeKey = null) {
         else if (APP_STATE.sortBy === 'priceDesc') filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
     }
     return filtered;
+}
+
+// ==========================================
+// معالجة بيانات المنح الدراسية (الجديدة)
+// ==========================================
+function processScholarshipsData(text) {
+    const rawLines = text.split('\n');
+    if (rawLines.length < 2) return;
+
+    const splitLine = (row) => {
+        const result = [];
+        let current = ''; let inQuote = false;
+        for (let i = 0; i < row.length; i++) {
+            const char = row[i];
+            if (char === '"') { inQuote = !inQuote; continue; }
+            if (char === ',' && !inQuote) { result.push(current.trim()); current = ''; } 
+            else { current += char; }
+        }
+        result.push(current.trim()); return result;
+    };
+
+    const headerLine = rawLines[0].toLowerCase().replace(/\r/g, '');
+    const headers = splitLine(headerLine);
+    
+    // دوال مساعدة لإيجاد الأعمدة
+    const getIdx = (name) => headers.findIndex(h => h.includes(name.toLowerCase()));
+    const getExactIdx = (name) => headers.findIndex(h => h === name.toLowerCase());
+
+    const idx = {
+        uniEn: getExactIdx('university-en'), uniAr: getExactIdx('university-ar'),
+        depEn: getExactIdx('department-en'), depAr: getExactIdx('department-ar'),
+        degEn: getExactIdx('degree-en'), degAr: getExactIdx('degree-ar'),
+        langEn: getExactIdx('language-en'), langAr: getExactIdx('language-ar'),
+        price: getExactIdx('price'), currency: getExactIdx('currency'),
+        seats: getExactIdx('seats'), 
+        condEn: getExactIdx('condition-en'), condAr: getExactIdx('condition-ar')
+    };
+
+    const parsedRows = rawLines.slice(1).map(line => {
+        const cols = splitLine(line);
+        if (cols.length < 5) return null;
+        
+        const getRawVal = (i) => (i > -1 && cols[i]) ? cols[i].replace(/\r/g, '').trim() : '';
+
+        // إذا لم يكتب اسم الجامعة، يتم تجاهل الصف
+        const uEn = getRawVal(idx.uniEn);
+        if(!uEn) return null;
+
+        return {
+            uniEn: uEn,
+            uniAr: getRawVal(idx.uniAr) || uEn,
+            depEn: getRawVal(idx.depEn),
+            depAr: getRawVal(idx.depAr) || getRawVal(idx.depEn),
+            degEn: getRawVal(idx.degEn),
+            degAr: getRawVal(idx.degAr) || getRawVal(idx.degEn),
+            langEn: getRawVal(idx.langEn),
+            langAr: getRawVal(idx.langAr) || getRawVal(idx.langEn),
+            price: getRawVal(idx.price),
+            currency: getRawVal(idx.currency) || "$",
+            seats: parseInt(getRawVal(idx.seats)) || 0,
+            condEn: getRawVal(idx.condEn),
+            condAr: getRawVal(idx.condAr) || getRawVal(idx.condEn)
+        };
+    }).filter(Boolean);
+
+    // تجميع البرامج داخل كل جامعة (Grouping by University)
+    const groupedData = {};
+
+    parsedRows.forEach(row => {
+        const uniKey = row.uniEn.toUpperCase();
+        
+        if (!groupedData[uniKey]) {
+            groupedData[uniKey] = {
+                id: `uni_${Object.keys(groupedData).length}`,
+                university: { en: row.uniEn, ar: row.uniAr },
+                condition: { en: row.condEn, ar: row.condAr },
+                programs: []
+            };
+        }
+
+        // إضافة البرنامج للجامعة
+        groupedData[uniKey].programs.push({
+            name: { en: row.depEn, ar: row.depAr },
+            degree: { en: row.degEn, ar: row.degAr },
+            language: { en: row.langEn, ar: row.langAr },
+            price: row.price,
+            currency: row.currency,
+            seats: row.seats
+        });
+    });
+
+    // تحويل الكائن إلى مصفوفة وتخزينها في APP_STATE
+    APP_STATE.scholarshipsData = Object.values(groupedData);
+
+    applyLanguage();
+    if (document.getElementById('scholarships-container')) {
+        renderScholarships();
+    }
 }

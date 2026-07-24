@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else if (isScholarshipsPage) {
         // Initialize the Scholarships system
-        applyLanguage();
-        renderScholarships();
+        // التعديل هنا: يجب استدعاء fetchData لجلب البيانات من الشيت قبل عرضها
+        fetchData(); 
     }
 
     // Handle global clicks (e.g. for closing dropdowns)

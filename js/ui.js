@@ -307,12 +307,14 @@ function renderScholarships() {
     
     container.innerHTML = '';
     
-    if (!SCHOLARSHIPS_DATA || SCHOLARSHIPS_DATA.length === 0) {
+    // التعديل هنا: يجب استخدام APP_STATE.scholarshipsData بدلاً من SCHOLARSHIPS_DATA
+    if (!APP_STATE.scholarshipsData || APP_STATE.scholarshipsData.length === 0) {
         container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-400">No scholarships available at the moment.</div>`;
         return;
     }
 
-    SCHOLARSHIPS_DATA.forEach((uniData, index) => {
+    // التعديل هنا أيضاً: استخدام APP_STATE.scholarshipsData
+    APP_STATE.scholarshipsData.forEach((uniData, index) => {
         const uniName = uniData.university[lang];
         const logoUrl = getUniversityLogo(uniData.university.en);
         const condition = uniData.condition[lang];
@@ -336,6 +338,7 @@ function renderScholarships() {
             const safeDeg = encodeURIComponent(prog.degree[lang]);
             const safeLang = encodeURIComponent(prog.language[lang]);
             
+            // التعديل هنا: استخدام prog.currency التي جلبناها من الشيت بدلاً من '$' الثابتة
             programsHtml += `
                 <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:bg-slate-100 transition-colors">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
@@ -351,7 +354,7 @@ function renderScholarships() {
                             </div>
                         </div>
                         <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
-                            <span class="text-red-600 font-bold text-lg leading-none">$${prog.price}</span>
+                            <span class="text-red-600 font-bold text-lg leading-none">${prog.price} ${prog.currency}</span>
                             <button onclick="reserveScholarship('${safeUniEn}', '${safeUniAr}', '${safeProgEn}', '${safeProgAr}', '${safeDeg}', '${safeLang}', '${prog.price}')" class="bg-fjGold hover:bg-yellow-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1">
                                 <i class="fa-brands fa-whatsapp text-sm"></i> ${t.reserve}
                             </button>
@@ -433,8 +436,8 @@ window.reserveScholarship = function(uniEn, uniAr, progEn, progAr, degree, lang,
     const progName = APP_STATE.lang === 'ar' ? programNameAr : programNameEn;
     
     let msg = APP_STATE.lang === 'ar' 
-        ? `مرحباً، أود حجز منحة دراسية:\nالجامعة: ${uniName}\nالتخصص: ${progName}\nالدرجة: ${degree}\nاللغة: ${lang}\nالسعر: $${price}`
-        : `Hello, I would like to reserve a scholarship:\nUniversity: ${uniName}\nProgram: ${progName}\nDegree: ${degree}\nLanguage: ${lang}\nPrice: $${price}`;
+        ? `مرحباً، أود حجز منحة دراسية:\nالجامعة: ${uniName}\nالتخصص: ${progName}\nالدرجة: ${degree}\nاللغة: ${lang}\nالسعر: ${price}`
+        : `Hello, I would like to reserve a scholarship:\nUniversity: ${uniName}\nProgram: ${progName}\nDegree: ${degree}\nLanguage: ${lang}\nPrice: ${price}`;
 
     const phone = "905526406104"; 
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
