@@ -241,6 +241,60 @@ function populateMultiSelect(key) {
     renderTags(key);
 }
 
+// === التسعير الديناميكي (حسب دور المستخدم والجامعة) ===
+function calculateDynamicPrice(basePriceStr, uniNameEn, programNameEn, programNameAr) {
+    if (!basePriceStr || basePriceStr === "0") return basePriceStr;
+    
+    // استخراج الرقم من النص 
+    let basePrice = parseFloat(basePriceStr.toString().replace(/[^0-9.]/g, ''));
+    if (isNaN(basePrice) || basePrice === 0) return basePriceStr;
+
+    const role = APP_STATE.userRole || 'student';
+    
+    // الإدمن والوكيل A يرون السعر الأساسي بلا إضافات
+    if (role === 'admin' || role === 'A') return basePriceStr;
+
+    const name = ((programNameEn || "") + " " + (programNameAr || "")).toLowerCase();
+    const uniName = (uniNameEn || "").toUpperCase();
+    
+    // التحقق مما إذا كانت الجامعة في قبرص (يتم خصم نصف الزيادة)
+    const isCyprus = uniName.includes('CYPRUS') || uniName.includes('قبرص');
+
+    let markup = 0;
+    let type = 'normal';
+
+    if (name.includes('طب بشري') || name.includes('medicine') || name.includes('mbbs')) type = 'medicine';
+    else if (name.includes('طب أسنان') || name.includes('dentistry') || name.includes('dental')) type = 'dentistry';
+    else if (name.includes('صيدلة') || name.includes('pharmacy')) type = 'pharmacy';
+
+    // تحديد الزيادة بناءً على الرتبة والتخصص
+    if (role === 'B') {
+        if (type === 'medicine') markup = 800;
+        else if (type === 'dentistry') markup = 400;
+        else if (type === 'pharmacy') markup = 200;
+        else markup = 100;
+    } else if (role === 'C') {
+        if (type === 'medicine') markup = 2000;
+        else if (type === 'dentistry') markup = 1000;
+        else if (type === 'pharmacy') markup = 500;
+        else markup = 300;
+    } else {
+        // طالب (Student)
+        if (type === 'medicine') markup = 3000;
+        else if (type === 'dentistry') markup = 2000;
+        else if (type === 'pharmacy') markup = 1500;
+        else markup = 1000;
+    }
+
+    // إذا كانت الجامعة في قبرص، يتم قسمة الزيادة على 2
+    if (isCyprus) {
+        markup = markup / 2;
+    }
+
+    // إعادة السعر بعد الزيادة
+    return (basePrice + markup).toString();
+}
+
 // === Rendering Main Programs View ===
 function renderPrograms() {
     const list = document.getElementById('programs-list'); 
@@ -263,9 +317,14 @@ function renderPrograms() {
         const logoUrl = getUniversityLogo(p.university.en);
         const logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${p.university[lang]}" class="w-[60px] h-[60px] object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">` : `<div class="w-[60px] h-[60px] rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
         
-        let priceHtml = `<div class="flex items-start gap-1"><span class="font-bold text-slate-700 whitespace-nowrap">${t.lblPrice}</span><div class="flex flex-col items-start gap-0.5"><div class="flex items-center gap-1">${(p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0") ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}<span class="text-red-600 font-bold text-[15px] leading-none">$${p.price}</span></div>${p.trainingPrice ? `<div class="flex items-center gap-1 mt-0.5"><span class="text-amber-600 font-bold leading-none">+ €${p.trainingPrice}</span><span class="text-[11px] text-amber-600/80 leading-none">(Flight)</span></div>` : ''}</div></div>`;
-        if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "" && p.cashPrice.trim() !== p.price.trim()) {
-            priceHtml += `<div class="mt-1.5 mb-0.5"><span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]"><i data-lucide="banknote" width="12"></i> ${t.lblCash} $${p.cashPrice}</span></div>`;
+        // حساب الأسعار الديناميكية (تم التعديل لتمرير 4 بارامترات فقط)
+        const dynPrice = calculateDynamicPrice(p.price, p.university.en, p.name.en, p.name.ar);
+        const dynOriginal = calculateDynamicPrice(p.originalPrice, p.university.en, p.name.en, p.name.ar);
+        const dynCash = calculateDynamicPrice(p.cashPrice, p.university.en, p.name.en, p.name.ar);
+
+        let priceHtml = `<div class="flex items-start gap-1"><span class="font-bold text-slate-700 whitespace-nowrap">${t.lblPrice}</span><div class="flex flex-col items-start gap-0.5"><div class="flex items-center gap-1">${(dynOriginal && dynOriginal !== dynPrice && !dynOriginal.includes('+') && dynOriginal !== "0") ? `<span class="line-through text-slate-400 text-xs">$${dynOriginal}</span>` : ''}<span class="text-red-600 font-bold text-[15px] leading-none">$${dynPrice}</span></div>${p.trainingPrice ? `<div class="flex items-center gap-1 mt-0.5"><span class="text-amber-600 font-bold leading-none">+ €${p.trainingPrice}</span><span class="text-[11px] text-amber-600/80 leading-none">(Flight)</span></div>` : ''}</div></div>`;
+        if (dynCash && dynCash !== "0" && dynCash !== "" && dynCash.trim() !== dynPrice.trim()) {
+            priceHtml += `<div class="mt-1.5 mb-0.5"><span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]"><i data-lucide="banknote" width="12"></i> ${t.lblCash} $${dynCash}</span></div>`;
         }
 
         const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`;
@@ -307,21 +366,23 @@ function renderScholarships() {
     
     container.innerHTML = '';
     
-    // التعديل هنا: يجب استخدام APP_STATE.scholarshipsData بدلاً من SCHOLARSHIPS_DATA
     if (!APP_STATE.scholarshipsData || APP_STATE.scholarshipsData.length === 0) {
         container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-400">No scholarships available at the moment.</div>`;
         return;
     }
 
-    // التعديل هنا أيضاً: استخدام APP_STATE.scholarshipsData
     APP_STATE.scholarshipsData.forEach((uniData, index) => {
+        // حساب المقاعد للبرامج المتاحة فقط (أكبر من 0) وإخفاء الجامعة بالكامل إذا لم يتبقَ شيء
+        const availablePrograms = uniData.programs.filter(prog => (parseInt(prog.seats) || 0) > 0);
+        if (availablePrograms.length === 0) return; // تخطي الجامعة بالكامل
+
         const uniName = uniData.university[lang];
         const logoUrl = getUniversityLogo(uniData.university.en);
         const condition = uniData.condition[lang];
         const accordionId = `accordion-${index}`;
         
-        // حساب إجمالي المقاعد ديناميكياً باستخدام reduce
-        const calculatedTotalSeats = uniData.programs.reduce((total, prog) => total + (parseInt(prog.seats) || 0), 0);
+        // حساب إجمالي المقاعد ديناميكياً
+        const calculatedTotalSeats = availablePrograms.reduce((total, prog) => total + parseInt(prog.seats), 0);
         
         const logoHtml = logoUrl 
             ? `<img src="${logoUrl}" alt="${uniName}" class="h-16 w-16 object-contain p-1 rounded-lg border border-slate-200 bg-white shadow-sm mb-3">` 
@@ -330,7 +391,7 @@ function renderScholarships() {
         // Generate Programs List for this University
         let programsHtml = `<div class="flex flex-col gap-3 mt-4 border-t border-slate-100 pt-4">`;
         
-        uniData.programs.forEach(prog => {
+        availablePrograms.forEach(prog => {
             const safeUniEn = encodeURIComponent(uniData.university.en);
             const safeUniAr = encodeURIComponent(uniData.university.ar);
             const safeProgEn = encodeURIComponent(prog.name.en);
@@ -338,7 +399,9 @@ function renderScholarships() {
             const safeDeg = encodeURIComponent(prog.degree[lang]);
             const safeLang = encodeURIComponent(prog.language[lang]);
             
-            // التعديل هنا: استخدام prog.currency التي جلبناها من الشيت بدلاً من '$' الثابتة
+            // حساب السعر الديناميكي لبرامج المنح
+            const dynPrice = calculateDynamicPrice(prog.price, uniData.university.en, prog.name.en, prog.name.ar);
+            
             programsHtml += `
                 <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:bg-slate-100 transition-colors">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
@@ -354,8 +417,8 @@ function renderScholarships() {
                             </div>
                         </div>
                         <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
-                            <span class="text-red-600 font-bold text-lg leading-none">${prog.price} ${prog.currency}</span>
-                            <button onclick="reserveScholarship('${safeUniEn}', '${safeUniAr}', '${safeProgEn}', '${safeProgAr}', '${safeDeg}', '${safeLang}', '${prog.price}')" class="bg-fjGold hover:bg-yellow-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1">
+                            <span class="text-red-600 font-bold text-lg leading-none">${dynPrice} ${prog.currency}</span>
+                            <button onclick="reserveScholarship('${safeUniEn}', '${safeUniAr}', '${safeProgEn}', '${safeProgAr}', '${safeDeg}', '${safeLang}', '${dynPrice}')" class="bg-fjGold hover:bg-yellow-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1">
                                 <i class="fa-brands fa-whatsapp text-sm"></i> ${t.reserve}
                             </button>
                         </div>

@@ -6,6 +6,10 @@ const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQucuU
 // رابط شيت المنح الدراسية (الجديد) - تم تحويله لصيغة CSV
 const SCHOLARSHIPS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQSPKnRvsa0n4zWLfrBYUd6gq_rzM9Zp6SDJAQYrL11C3LcOXhOt-1JtFlQSuS0KzwWFz5belulghwo/pub?output=csv";
 
+// رابط نظام تسجيل دخول الوكلاء (API)
+const AUTH_API_URL = "https://script.google.com/macros/s/AKfycbySohbHAIb59BDmBkRZNfnsvFtEUUM_C1tx5K2pTV9olWwLrgt9zTFxyCAfQL3k0Ku-/exec";
+
+
 const UNI_LOGOS = {
     "ALTINBAS": "assets/altinbas.png",
     "BAHCESEHIR UNIVERSITY": "assets/bau.png",
@@ -41,7 +45,7 @@ const UNI_LOGOS = {
     "YENI YUZYIL": "assets/yeni_yuzyil.png",
     "ANKARA MEDIPOL": "assets/ankara_medipol.jpg",
     "ATILIM": "assets/atilim.png",
-    "Near East University": "assets/Near_East_University.png",
+    "Near East": "assets/Near_East_University.png",
 };
 
 const TRANSLATIONS = {
