@@ -25,13 +25,13 @@ function injectAuthModal() {
     modal.id = 'auth-modal';
     modal.className = 'fixed inset-0 bg-fjNavy/95 z-50 flex items-center justify-center p-4 backdrop-blur-md';
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-[fadeIn_0.3s_ease-out]">
-            <div class="bg-fjNavy p-6 text-center border-b border-fjGold/20">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-[fadeIn_0.3s_ease-out] flex flex-col max-h-[90vh]">
+            <div class="bg-fjNavy p-6 text-center border-b border-fjGold/20 shrink-0">
                 <i class="fa-solid fa-graduation-cap text-fjGold text-4xl mb-2 drop-shadow-md"></i>
                 <h2 class="text-2xl font-black text-fjGold uppercase tracking-tight">Future Journey</h2>
                 <p class="text-fjGold/70 text-xs mt-1 uppercase tracking-widest">Portal Access</p>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 overflow-y-auto custom-scrollbar">
                 <div id="login-msg" class="hidden text-sm p-3 rounded-lg border text-center font-semibold"></div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Username / اسم المستخدم</label>
@@ -39,10 +39,10 @@ function injectAuthModal() {
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Password / كلمة المرور</label>
-                    <input type="password" id="auth-pass" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-fjGold outline-none bg-slate-50 focus:bg-white transition-colors" dir="ltr">
+                    <input type="password" id="auth-pass" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:border-fjGold outline-none bg-slate-50 focus:bg-white transition-colors" dir="ltr" onkeydown="if(event.key === 'Enter') handleLogin()">
                 </div>
                 <button onclick="handleLogin()" id="btn-login" class="w-full bg-fjNavy hover:bg-slate-800 text-fjGold font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-md">
-                    <i class="fa-solid fa-right-to-bracket"></i> Agent Login (دخول الوكيل)
+                    <i class="fa-solid fa-right-to-bracket"></i> Login (دخول)
                 </button>
                 
                 <div class="relative flex items-center py-2">
@@ -54,11 +54,27 @@ function injectAuthModal() {
                 <button onclick="continueAsStudent()" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2">
                     <i class="fa-solid fa-user-graduate"></i> Continue as Student (متابعة كطالب)
                 </button>
+
+                <!-- قسم طلب حساب وكيل جديد (Sign Up) -->
+                <div class="mt-4 pt-4 border-t border-slate-100 text-center">
+                    <p class="text-xs text-slate-500 mb-2">Don't have an account? / ليس لديك حساب؟</p>
+                    <button onclick="requestAgentAccount()" class="text-fjGold hover:text-yellow-600 font-bold text-sm transition-colors flex items-center justify-center gap-1.5 mx-auto">
+                        <i class="fa-solid fa-user-plus"></i> Request Account (طلب حساب)
+                    </button>
+                </div>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
 }
+
+window.requestAgentAccount = function() {
+    const msg = APP_STATE.lang === 'ar'
+        ? "مرحباً، أود طلب إنشاء حساب وكيل جديد في منصة Future Journey."
+        : "Hello, I would like to request a new account on the Future Journey platform.";
+    const phone = "905526406104"; 
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+};
 
 async function handleLogin() {
     const user = document.getElementById('auth-user').value.trim();
@@ -86,13 +102,13 @@ async function handleLogin() {
             msgBox.className = 'text-sm p-3 rounded-lg border text-center font-semibold bg-red-50 text-red-600 border-red-200 block';
             msgBox.innerText = APP_STATE.lang === 'en' ? 'Invalid Username or Password' : 'اسم المستخدم أو كلمة المرور غير صحيحة';
             btn.disabled = false;
-            btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Agent Login (دخول الوكيل)`;
+            btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Login (دخول)`;
         }
     } catch (e) {
         msgBox.className = 'text-sm p-3 rounded-lg border text-center font-semibold bg-red-50 text-red-600 border-red-200 block';
         msgBox.innerText = 'Connection Error. Please try again.';
         btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Agent Login (دخول الوكيل)`;
+        btn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Login (دخول)`;
     }
 }
 
@@ -106,16 +122,25 @@ function continueAsStudent() {
 
 function updateHeaderForUser() {
     const role = APP_STATE.userRole;
-    if (role !== 'student') {
-        const headerActions = document.querySelector('header .flex.items-center.gap-2.shrink-0') || document.querySelector('header .flex.items-center.gap-1\\.5.shrink-0');
-        if (headerActions && !document.getElementById('logout-btn')) {
-            const logoutBtn = document.createElement('button');
-            logoutBtn.id = 'logout-btn';
-            logoutBtn.onclick = () => { localStorage.removeItem('fj_userRole'); location.reload(); };
-            logoutBtn.className = 'ml-2 rtl:mr-2 rtl:ml-0 flex items-center justify-center px-2 py-1 rounded bg-red-500/10 hover:bg-red-500 hover:text-white border border-red-500/30 transition-all text-xs font-bold text-red-400 gap-1';
-            logoutBtn.innerHTML = `<i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Logout (${role})</span>`;
-            headerActions.appendChild(logoutBtn);
+    const headerActions = document.querySelector('header .flex.items-center.gap-2.shrink-0') || document.querySelector('header .flex.items-center.gap-1\\.5.shrink-0');
+    
+    if (headerActions && !document.getElementById('logout-btn')) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'logout-btn';
+        logoutBtn.onclick = () => { localStorage.removeItem('fj_userRole'); location.reload(); };
+        
+        if (role === 'student') {
+            // زر خروج للطالب
+            logoutBtn.className = 'ml-2 rtl:mr-2 rtl:ml-0 flex items-center justify-center px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all text-xs font-bold text-slate-700 gap-1.5 shadow-sm';
+            logoutBtn.innerHTML = `<i class="fa-solid fa-arrow-right-from-bracket"></i> <span class="hidden sm:inline">Exit Student Mode</span>`;
+        } else {
+            // زر خروج للوكيل / الأدمن
+            logoutBtn.className = 'ml-2 rtl:mr-2 rtl:ml-0 flex items-center justify-center px-2 py-1.5 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white border border-red-200 hover:border-red-500 transition-all text-xs font-bold text-red-600 gap-1.5 shadow-sm';
+            const displayRole = role === 'admin' ? 'Admin' : `Agent ${role}`;
+            logoutBtn.innerHTML = `<i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Logout</span>`;
         }
+        
+        headerActions.appendChild(logoutBtn);
     }
 }
 

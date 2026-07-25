@@ -45,7 +45,7 @@ const UNI_LOGOS = {
     "YENI YUZYIL": "assets/yeni_yuzyil.png",
     "ANKARA MEDIPOL": "assets/ankara_medipol.jpg",
     "ATILIM": "assets/atilim.png",
-    "Near East": "assets/Near_East_University.png",
+    "NEAR EAST": "assets/Near_East_University.png",
 };
 
 const TRANSLATIONS = {

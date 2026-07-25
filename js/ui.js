@@ -241,7 +241,7 @@ function populateMultiSelect(key) {
     renderTags(key);
 }
 
-// === التسعير الديناميكي (حسب دور المستخدم والجامعة) ===
+// === التسعير الديناميكي (حسب دور المستخدم والجامعة) - للمنح فقط ===
 function calculateDynamicPrice(basePriceStr, uniNameEn, programNameEn, programNameAr) {
     if (!basePriceStr || basePriceStr === "0") return basePriceStr;
     
@@ -295,7 +295,7 @@ function calculateDynamicPrice(basePriceStr, uniNameEn, programNameEn, programNa
     return (basePrice + markup).toString();
 }
 
-// === Rendering Main Programs View ===
+// === Rendering Main Programs View (بدون تسعير ديناميكي - الأسعار الأصلية فقط) ===
 function renderPrograms() {
     const list = document.getElementById('programs-list'); 
     if (!list) return; // الحماية لصفحة المنح
@@ -317,14 +317,10 @@ function renderPrograms() {
         const logoUrl = getUniversityLogo(p.university.en);
         const logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${p.university[lang]}" class="w-[60px] h-[60px] object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">` : `<div class="w-[60px] h-[60px] rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
         
-        // حساب الأسعار الديناميكية (تم التعديل لتمرير 4 بارامترات فقط)
-        const dynPrice = calculateDynamicPrice(p.price, p.university.en, p.name.en, p.name.ar);
-        const dynOriginal = calculateDynamicPrice(p.originalPrice, p.university.en, p.name.en, p.name.ar);
-        const dynCash = calculateDynamicPrice(p.cashPrice, p.university.en, p.name.en, p.name.ar);
-
-        let priceHtml = `<div class="flex items-start gap-1"><span class="font-bold text-slate-700 whitespace-nowrap">${t.lblPrice}</span><div class="flex flex-col items-start gap-0.5"><div class="flex items-center gap-1">${(dynOriginal && dynOriginal !== dynPrice && !dynOriginal.includes('+') && dynOriginal !== "0") ? `<span class="line-through text-slate-400 text-xs">$${dynOriginal}</span>` : ''}<span class="text-red-600 font-bold text-[15px] leading-none">$${dynPrice}</span></div>${p.trainingPrice ? `<div class="flex items-center gap-1 mt-0.5"><span class="text-amber-600 font-bold leading-none">+ €${p.trainingPrice}</span><span class="text-[11px] text-amber-600/80 leading-none">(Flight)</span></div>` : ''}</div></div>`;
-        if (dynCash && dynCash !== "0" && dynCash !== "" && dynCash.trim() !== dynPrice.trim()) {
-            priceHtml += `<div class="mt-1.5 mb-0.5"><span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]"><i data-lucide="banknote" width="12"></i> ${t.lblCash} $${dynCash}</span></div>`;
+        // استخدام الأسعار الأصلية مباشرة
+        let priceHtml = `<div class="flex items-start gap-1"><span class="font-bold text-slate-700 whitespace-nowrap">${t.lblPrice}</span><div class="flex flex-col items-start gap-0.5"><div class="flex items-center gap-1">${(p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0") ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}<span class="text-red-600 font-bold text-[15px] leading-none">$${p.price}</span></div>${p.trainingPrice ? `<div class="flex items-center gap-1 mt-0.5"><span class="text-amber-600 font-bold leading-none">+ €${p.trainingPrice}</span><span class="text-[11px] text-amber-600/80 leading-none">(Flight)</span></div>` : ''}</div></div>`;
+        if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "" && p.cashPrice.trim() !== p.price.trim()) {
+            priceHtml += `<div class="mt-1.5 mb-0.5"><span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]"><i data-lucide="banknote" width="12"></i> ${t.lblCash} $${p.cashPrice}</span></div>`;
         }
 
         const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`;
