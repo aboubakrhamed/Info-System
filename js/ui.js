@@ -4,9 +4,10 @@ function toggleLanguage() {
     APP_STATE.lang = APP_STATE.lang === 'en' ? 'ar' : 'en';
     applyLanguage(); 
     
-    // تحديث المحتوى بناءً على الصفحة المفتوحة
     if (document.getElementById('filters-container')) {
         setupFilters(); 
+    }
+    if (document.getElementById('programs-list')) {
         renderPrograms(); 
     }
     if (document.getElementById('scholarships-container')) {
@@ -34,7 +35,7 @@ function applyLanguage() {
     if (searchInput) searchInput.placeholder = t.searchPlaceholder;
 }
 
-// === Dropdown and Filtering Logic (for Programs) ===
+// === Dropdown and Filtering Logic ===
 function focusSearch(key) {
     const input = document.getElementById(`input-${key}`);
     if (input) { input.focus(); openDropdown(key); }
@@ -125,7 +126,10 @@ function selectItem(key, value) {
     const oldIndex = APP_STATE.highlightedIndex;
 
     APP_STATE.filters[key].add(value); 
-    renderTags(key); updateAllDropdowns(); APP_STATE.currentPage = 1; renderPrograms();
+    renderTags(key); updateAllDropdowns(); APP_STATE.currentPage = 1; 
+    
+    if (document.getElementById('programs-list')) renderPrograms();
+    if (document.getElementById('scholarships-container')) renderScholarships();
 
     setTimeout(() => {
         const inputRef = document.getElementById(`input-${key}`);
@@ -140,7 +144,9 @@ function selectItem(key, value) {
 
 function removeTag(key, value) {
     APP_STATE.filters[key].delete(value); 
-    renderTags(key); updateAllDropdowns(); APP_STATE.currentPage = 1; renderPrograms();
+    renderTags(key); updateAllDropdowns(); APP_STATE.currentPage = 1; 
+    if (document.getElementById('programs-list')) renderPrograms();
+    if (document.getElementById('scholarships-container')) renderScholarships();
     const input = document.getElementById(`input-${key}`); if(input) input.focus();
 }
 
@@ -170,48 +176,100 @@ function updateAllDropdowns() {
 
 function setupFilters() {
     const container = document.getElementById('filters-container'); 
-    if (!container) return; // الحماية لصفحة المنح
+    if (!container) return; 
     
+    const isProgramsPage = !!document.getElementById('programs-list');
+    const isScholarshipsPage = !!document.getElementById('scholarships-container');
+
     const t = TRANSLATIONS[APP_STATE.lang].filters; 
     const langT = TRANSLATIONS[APP_STATE.lang];
-    container.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            ${createMultiSelectHtml(t.country, 'country')} ${createMultiSelectHtml(t.city, 'city')}
-            ${createMultiSelectHtml(t.university, 'university')} ${createMultiSelectHtml(t.degree, 'degree')} ${createMultiSelectHtml(t.faculty, 'faculty')}
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            ${createMultiSelectHtml(t.department, 'department')} ${createMultiSelectHtml(t.language, 'language')}
-            ${createMultiSelectHtml(t.type, 'type')} ${createMultiSelectHtml(t.status, 'status')}
-            <div class="flex flex-col space-y-1.5 w-full">
-               <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">${t.price}</label>
-               <div class="flex gap-2">
-                 <input type="number" id="filter-minPrice" placeholder="Min" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
-                 <input type="number" id="filter-maxPrice" placeholder="Max" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
-               </div>
+    
+    let htmlContent = '';
+
+    if (isProgramsPage) {
+        htmlContent = `
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                ${createMultiSelectHtml(t.country, 'country')} ${createMultiSelectHtml(t.city, 'city')}
+                ${createMultiSelectHtml(t.university, 'university')} ${createMultiSelectHtml(t.degree, 'degree')} ${createMultiSelectHtml(t.faculty, 'faculty')}
             </div>
-        </div>
-        <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
-             <div class="flex flex-col space-y-1.5 w-48">
-                <select id="sort-select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold cursor-pointer">
-                    <option value="">${langT.sortBy}</option> <option value="priceAsc">${langT.sortLowHigh}</option> <option value="priceDesc">${langT.sortHighLow}</option>
-                </select>
-             </div>
-             <button onclick="clearFilters()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center gap-2"><i data-lucide="x" width="16"></i> ${langT.clearFilters}</button>
-        </div>
-    `;
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                ${createMultiSelectHtml(t.department, 'department')} ${createMultiSelectHtml(t.language, 'language')}
+                ${createMultiSelectHtml(t.type, 'type')} ${createMultiSelectHtml(t.status, 'status')}
+                <div class="flex flex-col space-y-1.5 w-full">
+                   <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">${t.price}</label>
+                   <div class="flex gap-2">
+                     <input type="number" id="filter-minPrice" placeholder="Min" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
+                     <input type="number" id="filter-maxPrice" placeholder="Max" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
+                   </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                 <div class="flex flex-col space-y-1.5 w-48">
+                    <select id="sort-select" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold cursor-pointer">
+                        <option value="">${langT.sortBy}</option> <option value="priceAsc">${langT.sortLowHigh}</option> <option value="priceDesc">${langT.sortHighLow}</option>
+                    </select>
+                 </div>
+                 <button onclick="clearFilters()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center gap-2"><i data-lucide="x" width="16"></i> ${langT.clearFilters}</button>
+            </div>
+        `;
+    } else if (isScholarshipsPage) {
+        // فلاتر المنح فقط
+        htmlContent = `
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                ${createMultiSelectHtml(t.country, 'country')} ${createMultiSelectHtml(t.city, 'city')} ${createMultiSelectHtml(t.university, 'university')}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                ${createMultiSelectHtml(t.department, 'department')} ${createMultiSelectHtml(t.degree, 'degree')} ${createMultiSelectHtml(t.language, 'language')}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex flex-col space-y-1.5 w-full">
+                   <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">${t.price}</label>
+                   <div class="flex gap-2">
+                     <input type="number" id="filter-minPrice" placeholder="Min" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
+                     <input type="number" id="filter-maxPrice" placeholder="Max" class="w-1/2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 outline-none focus:border-fjGold transition-all">
+                   </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                 <button onclick="clearFilters()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors flex items-center gap-2"><i data-lucide="x" width="16"></i> ${langT.clearFilters}</button>
+            </div>
+        `;
+    }
+
+    container.innerHTML = htmlContent;
 
     updateAllDropdowns();
+    
     ['minPrice', 'maxPrice'].forEach(key => {
         const el = document.getElementById(`filter-${key}`);
-        if(el) { el.value = APP_STATE.filters[key]; el.addEventListener('input', (e) => { APP_STATE.filters[key] = e.target.value; APP_STATE.currentPage = 1; updateAllDropdowns(); renderPrograms(); }); }
+        if(el) { 
+            el.value = APP_STATE.filters[key]; 
+            el.addEventListener('input', (e) => { 
+                APP_STATE.filters[key] = e.target.value; 
+                APP_STATE.currentPage = 1; 
+                updateAllDropdowns(); 
+                if (isProgramsPage) renderPrograms();
+                if (isScholarshipsPage) renderScholarships();
+            }); 
+        }
     });
+    
     const sortEl = document.getElementById('sort-select');
-    if(sortEl) { sortEl.value = APP_STATE.sortBy; sortEl.addEventListener('change', (e) => { APP_STATE.sortBy = e.target.value; APP_STATE.currentPage = 1; renderPrograms(); }); }
+    if(sortEl) { 
+        sortEl.value = APP_STATE.sortBy; 
+        sortEl.addEventListener('change', (e) => { 
+            APP_STATE.sortBy = e.target.value; 
+            APP_STATE.currentPage = 1; 
+            if (isProgramsPage) renderPrograms();
+        }); 
+    }
 }
 
 function clearFilters() {
     Object.keys(APP_STATE.filters).forEach(key => { if(APP_STATE.filters[key] instanceof Set) APP_STATE.filters[key].clear(); else APP_STATE.filters[key] = ''; });
-    APP_STATE.sortBy = ''; APP_STATE.currentPage = 1; setupFilters(); renderPrograms();
+    APP_STATE.sortBy = ''; APP_STATE.currentPage = 1; setupFilters(); 
+    if (document.getElementById('programs-list')) renderPrograms();
+    if (document.getElementById('scholarships-container')) renderScholarships();
 }
 
 function createMultiSelectHtml(label, key) {
@@ -230,10 +288,33 @@ function createMultiSelectHtml(label, key) {
 
 function populateMultiSelect(key) {
     const lang = APP_STATE.lang; const container = document.getElementById(`options-${key}`); if (!container) return;
-    const dataKey = key === 'department' ? 'name' : key; const relevantData = getFilteredData(key); 
-    const uniqueValues = Array.from(new Set(relevantData.map(p => p[dataKey][lang]).filter(Boolean))).sort();
+    const isScholarshipsPage = !!document.getElementById('scholarships-container');
+    const dataKey = key === 'department' ? 'name' : key; 
+    
+    let relevantData = isScholarshipsPage ? getFilteredScholarshipsData(key) : getFilteredData(key); 
+    
+    let uniqueValues = new Set();
+    
+    if (isScholarshipsPage) {
+        relevantData.forEach(uni => {
+            if (key === 'university' || key === 'country' || key === 'city') {
+                if (uni[key] && uni[key][lang]) uniqueValues.add(uni[key][lang]);
+            } else {
+                uni.programs.forEach(p => {
+                    if (p[dataKey] && p[dataKey][lang]) uniqueValues.add(p[dataKey][lang]);
+                });
+            }
+        });
+    } else {
+        relevantData.forEach(p => {
+            if (p[dataKey] && p[dataKey][lang]) uniqueValues.add(p[dataKey][lang]);
+        });
+    }
+
+    const uniqueValuesArr = Array.from(uniqueValues).filter(Boolean).sort();
+    
     container.innerHTML = '';
-    uniqueValues.forEach(val => {
+    uniqueValuesArr.forEach(val => {
         if(APP_STATE.filters[key].has(val)) return;
         const div = document.createElement('div'); div.className = 'dropdown-item px-3 py-2 hover:bg-fjGold/10 rounded cursor-pointer text-sm text-slate-700 transition-colors truncate';
         div.dataset.value = val; div.textContent = val; div.onclick = () => selectItem(key, val); container.appendChild(div);
@@ -241,7 +322,7 @@ function populateMultiSelect(key) {
     renderTags(key);
 }
 
-// === التسعير الديناميكي (حسب دور المستخدم والجامعة) - للمنح فقط ===
+// === التسعير الديناميكي (للمنح فقط) ===
 function calculateDynamicPrice(basePriceStr, uniNameEn, programNameEn, programNameAr) {
     if (!basePriceStr || basePriceStr === "0") return basePriceStr;
     
@@ -257,7 +338,6 @@ function calculateDynamicPrice(basePriceStr, uniNameEn, programNameEn, programNa
     const name = ((programNameEn || "") + " " + (programNameAr || "")).toLowerCase();
     const uniName = (uniNameEn || "").toUpperCase();
     
-    // التحقق مما إذا كانت الجامعة في قبرص (يتم خصم نصف الزيادة)
     const isCyprus = uniName.includes('CYPRUS') || uniName.includes('قبرص');
 
     let markup = 0;
@@ -267,38 +347,58 @@ function calculateDynamicPrice(basePriceStr, uniNameEn, programNameEn, programNa
     else if (name.includes('طب أسنان') || name.includes('dentistry') || name.includes('dental')) type = 'dentistry';
     else if (name.includes('صيدلة') || name.includes('pharmacy')) type = 'pharmacy';
 
-    // تحديد الزيادة بناءً على الرتبة والتخصص
+    // تحديد الزيادة بناءً على الرتبة، التخصص، ونطاق السعر
     if (role === 'B') {
-        if (type === 'medicine') markup = 800;
-        else if (type === 'dentistry') markup = 400;
-        else if (type === 'pharmacy') markup = 200;
-        else markup = 100;
+        if (type === 'medicine') markup = 1000;
+        else if (type === 'dentistry') markup = 600;
+        else if (type === 'pharmacy') markup = 300;
+        else {
+            if (basePrice <= 5000) markup = 100;
+            else if (basePrice <= 10000) markup = 200;
+            else if (basePrice <= 20000) markup = 300;
+            else markup = 500;
+        }
     } else if (role === 'C') {
-        if (type === 'medicine') markup = 2000;
-        else if (type === 'dentistry') markup = 1000;
+        if (type === 'medicine') markup = 1200;
+        else if (type === 'dentistry') markup = 800;
         else if (type === 'pharmacy') markup = 500;
-        else markup = 300;
+        else {
+            if (basePrice <= 5000) markup = 200;
+            else if (basePrice <= 10000) markup = 300;
+            else if (basePrice <= 15000) markup = 400;
+            else if (basePrice <= 20000) markup = 500;
+            else markup = 700;
+        }
     } else {
         // طالب (Student)
         if (type === 'medicine') markup = 3000;
         else if (type === 'dentistry') markup = 2000;
         else if (type === 'pharmacy') markup = 1500;
-        else markup = 1000;
+        else {
+            if (basePrice <= 5000) markup = 300;
+            else if (basePrice <= 10000) markup = 400;
+            else if (basePrice <= 15000) markup = 500;
+            else if (basePrice <= 20000) markup = 600;
+            else markup = 800;
+        }
     }
 
-    // إذا كانت الجامعة في قبرص، يتم قسمة الزيادة على 2
-    if (isCyprus) {
-        markup = markup / 2;
+    // إذا كانت الجامعة في قبرص والتخصص من التخصصات الطبية الثلاثة فقط
+    if (isCyprus && (type === 'medicine' || type === 'dentistry' || type === 'pharmacy')) {
+        // إذا كان السعر 20000 أو أقل، نخصم النصف. أما إذا كان أكثر من 20000 يأخذ نفس تسعيرة تركيا (لا يُقسم)
+        if (basePrice <= 20000) {
+            markup = markup / 2;
+        }
     }
 
     // إعادة السعر بعد الزيادة
     return (basePrice + markup).toString();
 }
 
-// === Rendering Main Programs View (بدون تسعير ديناميكي - الأسعار الأصلية فقط) ===
+// === Rendering Main Programs View ===
 function renderPrograms() {
     const list = document.getElementById('programs-list'); 
-    if (!list) return; // الحماية لصفحة المنح
+    if (!list) return; 
     
     const countLabel = document.getElementById('program-count');
     const lang = APP_STATE.lang; const t = TRANSLATIONS[lang]; list.innerHTML = '';
@@ -312,12 +412,19 @@ function renderPrograms() {
     if (totalItems === 0) list.innerHTML = `<div class="p-10 text-center text-slate-400">${lang === 'en' ? 'No programs found.' : 'لا توجد نتائج.'}</div>`;
 
     paginatedItems.forEach(p => {
-        const isClosed = p.status.en.toUpperCase().includes('CLOSED') || p.status.ar.includes('مغلق');
-        const statusColor = isClosed ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200';
+        const statusEn = (p.status.en || "").toUpperCase();
+        const statusAr = p.status.ar || "";
+        let statusColor = 'bg-green-100 text-green-700 border-green-200'; 
+        
+        if (statusEn.includes('CLOSED') || statusAr.includes('مغلق') || statusEn.includes('QUOTA FULL') || statusEn.includes('FULL') || statusAr.includes('اكتمل') || statusAr.includes('ممتلئ')) {
+            statusColor = 'bg-red-100 text-red-700 border-red-200'; 
+        } else if (statusEn.includes('NEAR TO CLOSE') || statusEn.includes('NEAR') || statusAr.includes('قارب') || statusAr.includes('وشك')) {
+            statusColor = 'bg-amber-100 text-amber-700 border-amber-200'; 
+        }
+
         const logoUrl = getUniversityLogo(p.university.en);
         const logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${p.university[lang]}" class="w-[60px] h-[60px] object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">` : `<div class="w-[60px] h-[60px] rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
         
-        // استخدام الأسعار الأصلية مباشرة
         let priceHtml = `<div class="flex items-start gap-1"><span class="font-bold text-slate-700 whitespace-nowrap">${t.lblPrice}</span><div class="flex flex-col items-start gap-0.5"><div class="flex items-center gap-1">${(p.originalPrice && p.originalPrice !== p.price && !p.originalPrice.includes('+') && p.originalPrice !== "0") ? `<span class="line-through text-slate-400 text-xs">$${p.originalPrice}</span>` : ''}<span class="text-red-600 font-bold text-[15px] leading-none">$${p.price}</span></div>${p.trainingPrice ? `<div class="flex items-center gap-1 mt-0.5"><span class="text-amber-600 font-bold leading-none">+ €${p.trainingPrice}</span><span class="text-[11px] text-amber-600/80 leading-none">(Flight)</span></div>` : ''}</div></div>`;
         if (p.cashPrice && p.cashPrice !== "0" && p.cashPrice !== "" && p.cashPrice.trim() !== p.price.trim()) {
             priceHtml += `<div class="mt-1.5 mb-0.5"><span class="font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 text-[11px]"><i data-lucide="banknote" width="12"></i> ${t.lblCash} $${p.cashPrice}</span></div>`;
@@ -352,39 +459,41 @@ function jumpToPage() {
     if (pageNum >= 1 && pageNum <= totalPages) { APP_STATE.currentPage = pageNum; renderPrograms(); } else { alert(APP_STATE.lang === 'en' ? `Please enter a valid page number (1-${totalPages})` : `الرجاء إدخال رقم صفحة صحيح (1-${totalPages})`); }
 }
 
-// === Rendering Scholarships View ===
+// === Rendering Scholarships View (المحدث ليدعم الفلترة) ===
 function renderScholarships() {
     const container = document.getElementById('scholarships-container');
-    if (!container) return; // الحماية لصفحة البرامج
+    if (!container) return; 
     
     const lang = APP_STATE.lang;
     const t = TRANSLATIONS[lang];
     
     container.innerHTML = '';
     
-    if (!APP_STATE.scholarshipsData || APP_STATE.scholarshipsData.length === 0) {
-        container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-400">No scholarships available at the moment.</div>`;
+    // نستخدم البيانات المفلترة هنا بدلاً من البيانات الأصلية
+    const dataToRender = getFilteredScholarshipsData();
+    
+    if (!dataToRender || dataToRender.length === 0) {
+        container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-400 font-medium bg-white rounded-xl shadow-sm border border-slate-200">
+            ${lang === 'en' ? 'No scholarships found matching your criteria.' : 'لا توجد منح دراسية تطابق معايير البحث.'}
+        </div>`;
         return;
     }
 
-    APP_STATE.scholarshipsData.forEach((uniData, index) => {
-        // حساب المقاعد للبرامج المتاحة فقط (أكبر من 0) وإخفاء الجامعة بالكامل إذا لم يتبقَ شيء
+    dataToRender.forEach((uniData, index) => {
         const availablePrograms = uniData.programs.filter(prog => (parseInt(prog.seats) || 0) > 0);
-        if (availablePrograms.length === 0) return; // تخطي الجامعة بالكامل
+        if (availablePrograms.length === 0) return; 
 
         const uniName = uniData.university[lang];
         const logoUrl = getUniversityLogo(uniData.university.en);
         const condition = uniData.condition[lang];
         const accordionId = `accordion-${index}`;
         
-        // حساب إجمالي المقاعد ديناميكياً
         const calculatedTotalSeats = availablePrograms.reduce((total, prog) => total + parseInt(prog.seats), 0);
         
         const logoHtml = logoUrl 
             ? `<img src="${logoUrl}" alt="${uniName}" class="h-16 w-16 object-contain p-1 rounded-lg border border-slate-200 bg-white shadow-sm mb-3">` 
             : `<div class="h-16 w-16 rounded-lg border border-slate-200 bg-white p-2 flex items-center justify-center shadow-sm mb-3"><i data-lucide="building-2" class="text-slate-400 w-8 h-8"></i></div>`;
 
-        // Generate Programs List for this University
         let programsHtml = `<div class="flex flex-col gap-3 mt-4 border-t border-slate-100 pt-4">`;
         
         availablePrograms.forEach(prog => {
@@ -395,7 +504,6 @@ function renderScholarships() {
             const safeDeg = encodeURIComponent(prog.degree[lang]);
             const safeLang = encodeURIComponent(prog.language[lang]);
             
-            // حساب السعر الديناميكي لبرامج المنح
             const dynPrice = calculateDynamicPrice(prog.price, uniData.university.en, prog.name.en, prog.name.ar);
             
             programsHtml += `
@@ -425,7 +533,6 @@ function renderScholarships() {
         
         programsHtml += `</div>`;
 
-        // University Card
         const card = document.createElement('div');
         card.className = "bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col";
         
@@ -435,6 +542,13 @@ function renderScholarships() {
                     <div>
                         ${logoHtml}
                         <h3 class="font-extrabold text-fjNavy text-lg mb-1 leading-tight">${uniName}</h3>
+                        
+                        ${(uniData.city && uniData.country) ? `
+                        <div class="text-xs text-slate-500 mb-2 font-medium flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-3 h-3"></i> ${uniData.city[lang]}, ${uniData.country[lang]}
+                        </div>
+                        ` : ''}
+
                         <div class="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-md text-xs font-bold mb-3">
                             <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
                             ${t.totalScholarships}: ${calculatedTotalSeats}

@@ -54,6 +54,17 @@
             </div>
         </div>
         
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-2xl mx-1.5 sm:mx-3 md:mx-4 lg:mx-8 relative group">
+            <i data-lucide="search" width="16" class="absolute left-2.5 rtl:left-auto rtl:right-2.5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-fjGold transition-colors pointer-events-none"></i>
+            <input 
+                type="text"
+                id="search-input"
+                placeholder="Quick Search..."
+                class="w-full py-1.5 md:py-2.5 pl-8 pr-3 rtl:pr-8 rtl:pl-3 rounded-lg border border-slate-700 bg-[#151D2E] focus:bg-fjNavy focus:ring-2 focus:ring-fjGold/30 focus:border-fjGold/50 transition-all text-[13px] md:text-sm outline-none text-slate-200 placeholder:text-slate-500"
+            >
+        </div>
+
         <div class="flex items-center gap-2 md:gap-3 shrink-0">
             <!-- Navigate back to Programs -->
             <a href="index.html" class="hidden md:flex items-center justify-center px-3 py-1.5 rounded-lg border border-slate-600 hover:bg-slate-800 hover:text-white transition-all text-sm font-bold text-slate-300 gap-2">
@@ -74,7 +85,7 @@
         </div>
     </header>
 
-    <!-- Mobile Navigation Link (Visible only on small screens) -->
+    <!-- Mobile Navigation Link -->
     <div class="md:hidden bg-white border-b border-slate-200 p-2 flex justify-center">
         <a href="index.html" class="flex w-full items-center justify-center px-3 py-2 rounded-lg bg-slate-100 border border-slate-300 text-slate-700 font-bold text-sm gap-2">
             <i class="fa-solid fa-list"></i>
@@ -83,17 +94,22 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 p-3 md:p-6 space-y-4 md:space-y-6 min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)]">
+    <main class="flex-1 p-3 md:p-6 space-y-4 md:space-y-6 h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
         
         <div id="scholarships-view" class="space-y-6 pb-10 max-w-7xl mx-auto">
-            <div class="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
+            <div class="flex items-center justify-between mb-2 border-b border-slate-200 pb-3">
                 <h2 class="text-xl md:text-3xl font-black text-fjNavy flex items-center gap-3">
                     <i class="fa-solid fa-award text-fjGold text-2xl md:text-4xl drop-shadow-sm"></i> 
                     <span data-i18n="tabScholarships">Available Scholarships</span>
                 </h2>
             </div>
             
-            <!-- Scholarships Container (Added items-start to prevent height stretching) -->
+            <!-- Filters Container (New) -->
+            <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-slate-200 space-y-4 mb-6" id="filters-container">
+                <!-- Dynamic Filters -->
+            </div>
+
+            <!-- Scholarships Container -->
             <div id="scholarships-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
                 <!-- Data populated by JS -->
             </div>

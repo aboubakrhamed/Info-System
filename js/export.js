@@ -5,8 +5,17 @@ function executePrint() {
     const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
     const rowsHtml = filteredData.map(p => {
-        const isClosed = p.status.en.toUpperCase().includes('CLOSED') || p.status.ar.includes('مغلق');
-        const statusColor = isClosed ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200';
+        // تحديث منطق الألوان في الطباعة أيضاً
+        const statusEn = (p.status.en || "").toUpperCase();
+        const statusAr = p.status.ar || "";
+        let statusColor = 'bg-green-100 text-green-700 border-green-200'; // Default Green
+        
+        if (statusEn.includes('CLOSED') || statusAr.includes('مغلق') || statusEn.includes('QUOTA FULL') || statusEn.includes('FULL') || statusAr.includes('اكتمل') || statusAr.includes('ممتلئ')) {
+            statusColor = 'bg-red-100 text-red-700 border-red-200';
+        } else if (statusEn.includes('NEAR TO CLOSE') || statusEn.includes('NEAR') || statusAr.includes('قارب') || statusAr.includes('وشك')) {
+            statusColor = 'bg-amber-100 text-amber-700 border-amber-200'; // Amber/Orange
+        }
+
         const logoUrl = getUniversityLogo(p.university.en);
         const logoHtml = logoUrl ? `<img src="${logoUrl}" class="w-[60px] h-[60px] object-contain p-1 rounded-full border border-slate-200 bg-white shrink-0 shadow-sm">` : `<div class="w-[60px] h-[60px] rounded-full border border-slate-200 bg-white p-2 flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="building-2" class="text-slate-400"></i></div>`;
 

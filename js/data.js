@@ -2,6 +2,7 @@
 
 let APP_STATE = {
     lang: 'en', // اللغة الافتراضية إنجليزي
+    userRole: null, // سيتم تخزين دور المستخدم هنا
     data: [], // بيانات البرامج الأكاديمية
     scholarshipsData: [], // بيانات المنح سيتم تخزينها هنا بعد جلبها من جوجل شيت
     filters: {
@@ -48,7 +49,6 @@ async function fetchData() {
             }
         } catch (err) {
             console.error("All data fetch attempts failed.", err);
-            // إظهار رسالة خطأ في حالة فشل جلب المنح
             if (!isProgramsPage) {
                 const container = document.getElementById('scholarships-container');
                 if(container) container.innerHTML = `<div class="col-span-full p-10 text-center text-red-500">Failed to load scholarships data. Please check the Google Sheet link or try again later.</div>`;
@@ -60,7 +60,7 @@ async function fetchData() {
 }
 
 // ==========================================
-// معالجة بيانات البرامج الأكاديمية (القديمة)
+// معالجة بيانات البرامج الأكاديمية 
 // ==========================================
 function processData(text) {
     APP_STATE.data = parseCSV(text);
@@ -190,7 +190,7 @@ function getFilteredData(excludeKey = null) {
 }
 
 // ==========================================
-// معالجة بيانات المنح الدراسية (الجديدة)
+// معالجة بيانات المنح الدراسية والفلترة
 // ==========================================
 function processScholarshipsData(text) {
     const rawLines = text.split('\n');
@@ -211,8 +211,6 @@ function processScholarshipsData(text) {
     const headerLine = rawLines[0].toLowerCase().replace(/\r/g, '');
     const headers = splitLine(headerLine);
     
-    // دوال مساعدة لإيجاد الأعمدة
-    const getIdx = (name) => headers.findIndex(h => h.includes(name.toLowerCase()));
     const getExactIdx = (name) => headers.findIndex(h => h === name.toLowerCase());
 
     const idx = {
@@ -222,7 +220,9 @@ function processScholarshipsData(text) {
         langEn: getExactIdx('language-en'), langAr: getExactIdx('language-ar'),
         price: getExactIdx('price'), currency: getExactIdx('currency'),
         seats: getExactIdx('seats'), 
-        condEn: getExactIdx('condition-en'), condAr: getExactIdx('condition-ar')
+        condEn: getExactIdx('condition-en'), condAr: getExactIdx('condition-ar'),
+        countryEn: getExactIdx('country-en'), countryAr: getExactIdx('country-ar'),
+        cityEn: getExactIdx('city-en'), cityAr: getExactIdx('city-ar')
     };
 
     const parsedRows = rawLines.slice(1).map(line => {
@@ -231,7 +231,6 @@ function processScholarshipsData(text) {
         
         const getRawVal = (i) => (i > -1 && cols[i]) ? cols[i].replace(/\r/g, '').trim() : '';
 
-        // إذا لم يكتب اسم الجامعة، يتم تجاهل الصف
         const uEn = getRawVal(idx.uniEn);
         if(!uEn) return null;
 
@@ -248,11 +247,14 @@ function processScholarshipsData(text) {
             currency: getRawVal(idx.currency) || "$",
             seats: parseInt(getRawVal(idx.seats)) || 0,
             condEn: getRawVal(idx.condEn),
-            condAr: getRawVal(idx.condAr) || getRawVal(idx.condEn)
+            condAr: getRawVal(idx.condAr) || getRawVal(idx.condEn),
+            countryEn: getRawVal(idx.countryEn),
+            countryAr: getRawVal(idx.countryAr) || getRawVal(idx.countryEn),
+            cityEn: getRawVal(idx.cityEn),
+            cityAr: getRawVal(idx.cityAr) || getRawVal(idx.cityEn)
         };
     }).filter(Boolean);
 
-    // تجميع البرامج داخل كل جامعة (Grouping by University)
     const groupedData = {};
 
     parsedRows.forEach(row => {
@@ -263,11 +265,12 @@ function processScholarshipsData(text) {
                 id: `uni_${Object.keys(groupedData).length}`,
                 university: { en: row.uniEn, ar: row.uniAr },
                 condition: { en: row.condEn, ar: row.condAr },
+                country: { en: row.countryEn, ar: row.countryAr },
+                city: { en: row.cityEn, ar: row.cityAr },
                 programs: []
             };
         }
 
-        // إضافة البرنامج للجامعة
         groupedData[uniKey].programs.push({
             name: { en: row.depEn, ar: row.depAr },
             degree: { en: row.degEn, ar: row.degAr },
@@ -278,11 +281,72 @@ function processScholarshipsData(text) {
         });
     });
 
-    // تحويل الكائن إلى مصفوفة وتخزينها في APP_STATE
     APP_STATE.scholarshipsData = Object.values(groupedData);
 
     applyLanguage();
+    if (document.getElementById('filters-container')) {
+        setupFilters();
+    }
     if (document.getElementById('scholarships-container')) {
         renderScholarships();
     }
+}
+
+// === دالة استخراج بيانات المنح مفلترة ===
+function getFilteredScholarshipsData(excludeKey = null) {
+    const lang = APP_STATE.lang;
+    const term = APP_STATE.searchTerm || '';
+    
+    let filtered = [];
+    
+    APP_STATE.scholarshipsData.forEach(uni => {
+        const uniNameMatches = (uni.university[lang] || '').toLowerCase().includes(term);
+        const countryMatches = uni.country && (uni.country[lang] || '').toLowerCase().includes(term);
+        const cityMatches = uni.city && (uni.city[lang] || '').toLowerCase().includes(term);
+        const uniLevelMatchesSearch = uniNameMatches || countryMatches || cityMatches;
+
+        let validPrograms = uni.programs.filter(p => {
+            // 1. فحص البحث السريع
+            const progNameMatches = (p.name[lang] || '').toLowerCase().includes(term);
+            if (!uniLevelMatchesSearch && !progNameMatches && term !== '') return false;
+
+            // 2. فحص السعر (يتم تطبيق الفلتر على السعر بعد زيادة الوكيل/الطالب)
+            // نستخدم calculateDynamicPrice الموجودة في ui.js
+            const dynPriceStr = typeof calculateDynamicPrice === 'function' ? calculateDynamicPrice(p.price, uni.university.en, p.name.en, p.name.ar) : p.price;
+            const price = parseFloat(dynPriceStr.toString().replace(/[^0-9.]/g, ''));
+            
+            const minP = APP_STATE.filters.minPrice ? parseFloat(APP_STATE.filters.minPrice) : 0; 
+            const maxP = APP_STATE.filters.maxPrice ? parseFloat(APP_STATE.filters.maxPrice) : Infinity;
+            if (!isNaN(price) && (price < minP || price > maxP)) return false;
+
+            // 3. فحص الفلاتر (الدولة، المدينة، التخصص، الدرجة...)
+            const matchesFilters = Object.keys(APP_STATE.filters).every(key => {
+                if (key === 'minPrice' || key === 'maxPrice' || key === excludeKey) return true;
+                const set = APP_STATE.filters[key]; 
+                if (set.size === 0) return true;
+                
+                let dataVal; 
+                if (key === 'department') dataVal = p.name[lang]; 
+                else if (key === 'degree') dataVal = p.degree[lang]; 
+                else if (key === 'language') dataVal = p.language[lang]; 
+                else if (key === 'country') dataVal = uni.country ? uni.country[lang] : undefined; 
+                else if (key === 'city') dataVal = uni.city ? uni.city[lang] : undefined; 
+                else if (key === 'university') dataVal = uni.university[lang]; 
+                else return true; // تجاهل الفلاتر غير المتعلقة بالمنح
+
+                return set.has(dataVal);
+            });
+
+            return matchesFilters;
+        });
+
+        if (validPrograms.length > 0) {
+            filtered.push({
+                ...uni,
+                programs: validPrograms
+            });
+        }
+    });
+    
+    return filtered;
 }

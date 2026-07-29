@@ -57,7 +57,7 @@ function injectAuthModal() {
 
                 <!-- قسم طلب حساب وكيل جديد (Sign Up) -->
                 <div class="mt-4 pt-4 border-t border-slate-100 text-center">
-                    <p class="text-xs text-slate-500 mb-2">Don't have an account? / ليس لديك حساب؟</p>
+                    <p class="text-xs text-slate-500 mb-2">Don't have an agent account? / ليس لديك حساب وكيل؟</p>
                     <button onclick="requestAgentAccount()" class="text-fjGold hover:text-yellow-600 font-bold text-sm transition-colors flex items-center justify-center gap-1.5 mx-auto">
                         <i class="fa-solid fa-user-plus"></i> Request Account (طلب حساب)
                     </button>
@@ -71,7 +71,7 @@ function injectAuthModal() {
 window.requestAgentAccount = function() {
     const msg = APP_STATE.lang === 'ar'
         ? "مرحباً، أود طلب إنشاء حساب وكيل جديد في منصة Future Journey."
-        : "Hello, I would like to request a new account on the Future Journey platform.";
+        : "Hello, I would like to request a new Agent Account on the Future Journey platform.";
     const phone = "905526406104"; 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
@@ -130,16 +130,13 @@ function updateHeaderForUser() {
         logoutBtn.onclick = () => { localStorage.removeItem('fj_userRole'); location.reload(); };
         
         if (role === 'student') {
-            // زر خروج للطالب
             logoutBtn.className = 'ml-2 rtl:mr-2 rtl:ml-0 flex items-center justify-center px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all text-xs font-bold text-slate-700 gap-1.5 shadow-sm';
             logoutBtn.innerHTML = `<i class="fa-solid fa-arrow-right-from-bracket"></i> <span class="hidden sm:inline">Exit Student Mode</span>`;
         } else {
-            // زر خروج للوكيل / الأدمن
             logoutBtn.className = 'ml-2 rtl:mr-2 rtl:ml-0 flex items-center justify-center px-2 py-1.5 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white border border-red-200 hover:border-red-500 transition-all text-xs font-bold text-red-600 gap-1.5 shadow-sm';
             const displayRole = role === 'admin' ? 'Admin' : `Agent ${role}`;
             logoutBtn.innerHTML = `<i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Logout</span>`;
         }
-        
         headerActions.appendChild(logoutBtn);
     }
 }
@@ -150,16 +147,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const isProgramsPage = !!document.getElementById('programs-list');
     const isScholarshipsPage = !!document.getElementById('scholarships-container');
 
-    if (isProgramsPage) {
-        checkAuthAndInit(); 
-        
-        document.getElementById('search-input').addEventListener('input', (e) => {
+    // دعم شريط البحث في الصفحتين
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
             APP_STATE.searchTerm = e.target.value.toLowerCase();
             APP_STATE.currentPage = 1;
             updateAllDropdowns(); 
-            renderPrograms();
+            if (isProgramsPage) renderPrograms();
+            if (isScholarshipsPage) renderScholarships();
         });
+    }
 
+    if (isProgramsPage) {
+        checkAuthAndInit(); 
+        
         const downloadBtn = document.querySelector('[data-action="download"]');
         if (downloadBtn) {
             downloadBtn.addEventListener('click', downloadPDF);
